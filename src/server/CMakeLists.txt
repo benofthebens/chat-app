@@ -5,3 +5,4 @@ add_executable(Server
     "server.cpp"
     "../../include/server.h"
 )
+target_include_directories(Server PRIVATE "../../include")

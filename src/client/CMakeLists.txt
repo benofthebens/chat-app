@@ -5,3 +5,4 @@ add_executable(Client
     "../connection_base.cpp"
     "../../include/connection_base.h"
 )
+target_include_directories(Client PRIVATE "../../include")
