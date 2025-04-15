@@ -5,16 +5,15 @@
 
 class Server : public ConnectionBase {
 private:
-    std::vector<SOCKET> clients;
-    void Server::receive(SOCKET socket);
+    std::vector<SOCKET> clients_;
+    void receive(const SOCKET socket);
 public:
     Server(
         const std::string& host,
         const unsigned int port
-    ) : ConnectionBase(host, port) {
-    }
-    ~Server() = default;
+    ) : ConnectionBase(host, port) {}
+    ~Server() override = default;
     int start();
-    int send_msg(const SOCKET reciever_socket, const char message[]) override;
-    int broardcast_message(const char message[]);
+    int send_msg(const SOCKET receiver_socket, const char message[]) override;
+    int broadcast_message(const char message[]);
 };
