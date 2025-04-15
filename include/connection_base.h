@@ -4,13 +4,13 @@
 
 class ConnectionBase {
 protected:
-    sockaddr_in service;
-    SOCKET connection_socket = INVALID_SOCKET;
-    WSAData wsa_data;
-    const std::string& host;
-    const unsigned int port;
+    sockaddr_in service_;
+    SOCKET connection_socket_ = INVALID_SOCKET;
+    WSAData wsa_data_;
+    const std::string& host_;
+    const unsigned int port_;
 public:
     ConnectionBase(const std::string& host, const unsigned int port);
     virtual ~ConnectionBase() = default;
-    virtual int send_msg(const SOCKET reciever_socket, const char message[]) = 0;
+    virtual int send_msg(const SOCKET receiver_socket, const char message[]) = 0;
 };
