@@ -1,4 +1,6 @@
-#pragma once
+#ifndef SERVER_H
+#define SERVER_H
+
 #include "connection_base.h"
 #include <vector>
 #include <WinSock2.h>
@@ -17,3 +19,5 @@ public:
     int send_msg(const SOCKET receiver_socket, const char message[]) override;
     int broadcast_message(const char message[]);
 };
+
+#endif

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef CONNECTION_BASE_H
+#define CONNECTION_BASE_H
+
 #include <WinSock2.h>
 #include <string>
 
@@ -14,3 +16,5 @@ public:
     virtual ~ConnectionBase() = default;
     virtual int send_msg(const SOCKET receiver_socket, const char message[]) = 0;
 };
+
+#endif
