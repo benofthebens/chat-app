@@ -10,23 +10,22 @@ int Client::start() {
         return -1;
     }
 
+    std::thread receiver(&Client::receiver, this);
+    receiver.detach(); // detach
+
     while (true) {
         // Create buffer with 200 size to get message
-        char buffer[200];
-
-        // Create receiver thread to get responses from server
-        std::thread receiver(&Client::receiver, this);
-        receiver.detach(); // detach
+        char buffer[256];
 
         // Read message from cli
-        std::cin.getline(buffer, 200);
-        send_msg(connection_socket_, buffer);
+        std::cin.getline(buffer, sizeof(buffer));
+        //send_msg(connection_socket_, buffer);
     }
 }
 
 int Client::send_msg(const SOCKET receiver_socket, const char message[]) {
     // Send the message to the receiver socket of length 200
-    const int byte_count = send(receiver_socket, message, 200, 0);
+    const int byte_count = send(connection_socket_, message, 256, 0);
 
     // Error checking 
     if (byte_count == SOCKET_ERROR) {
@@ -39,7 +38,7 @@ int Client::send_msg(const SOCKET receiver_socket, const char message[]) {
 
 int Client::receiver() const {
     while (true) {
-        char buffer[200]; // buffer to write to
+        char buffer[256]; // buffer to write to
         // wait for a message from the server
         const int byte_count = recv(connection_socket_, buffer, sizeof(buffer), 0);
 
@@ -50,6 +49,11 @@ int Client::receiver() const {
         }
 
         // Output to client's console
-        std::cout << buffer << std::endl;
+        if (message_handler_)
+            message_handler_(buffer);
     }
+}
+
+void Client::set_message_handler(std::function<void(const char[])> message_handler) {
+    message_handler_ = message_handler;
 }
