@@ -27,9 +27,11 @@ int Server::start() {
             std::cout << "failed to accept" << std::endl;
             continue;
         }
+        std::cout << "Client has connected to server" << std::endl;
 
         // put it in the list of clients connected
         clients_.push_back(accept_socket);
+        broadcast_message("User has joined the Chat");
 
         // Create thread per user connected 
         std::thread receive(&Server::receive, this, accept_socket);
@@ -40,18 +42,15 @@ int Server::start() {
 void Server::receive(const SOCKET socket) {
     while (true) {
         // buffer to be read into
-        char buffer[200];
+        char buffer[256];
         // Waits for the client to send a request
         const int byte_count = recv(socket, buffer, sizeof(buffer), 0);
 
         if (byte_count < 0) break;
 
         // Broadcast message to everyone except the client sent
-        for (const SOCKET client : clients_) {
-            if (client == socket) continue;
-            send_msg(client, buffer);
-        }
-    }
+        broadcast_message(buffer);
+   }
     // Remove the socket from the clients
     clients_.erase(std::remove(clients_.begin(), clients_.end(), socket), clients_.end());
     broadcast_message("A User has disconnected from the session");
@@ -59,7 +58,7 @@ void Server::receive(const SOCKET socket) {
 
 int Server::send_msg(const SOCKET receiver_socket, const char message[]) {
     // Send a message to the receiver socket with a length of 200
-    const int byte_count = send(receiver_socket, message, 200, 0);
+    const int byte_count = send(receiver_socket, message, 256, 0);
     if (byte_count == SOCKET_ERROR ) return -1;
     return 0;
 }
