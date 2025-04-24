@@ -3,9 +3,10 @@ add_executable(App WIN32
     "../../include/window_base.h"
     "../../include/main_window.h"
     "main_window.cpp"
-    "../server/server.cpp"
-    "../client/client.cpp"
-    "../connection_base.cpp"
  )
 
-target_include_directories(App PRIVATE "../../include")
+target_include_directories(App PRIVATE 
+    "../../include"
+    "../../include/network_core"
+)
+target_link_libraries(App PRIVATE NetworkCore)
