@@ -1,9 +1,10 @@
 #ifndef MAIN_WINDOW_H
 #define MAIN_WINDOW_H
 
+#include <mutex>
+
 #include "client.h"
 #include "server.h"
-#include <thread>
 #include "window_base.h"
 
 #define DISPLAY_TEXT 4
@@ -17,9 +18,11 @@ private:
     HWND display_window_ = nullptr;
     Server* server_ = nullptr;
     Client* client_ = nullptr;
-    std::string display_text_ = " ";
+    std::string display_text_;
+    std::mutex text_mutex_;
     int handle_command(WPARAM w_param, LPARAM l_param);
 public:
+    ~MainWindow() override;
     LPCSTR class_name() const override;
     LRESULT handle_message(UINT msg, WPARAM w_param, LPARAM l_param) override;
 };

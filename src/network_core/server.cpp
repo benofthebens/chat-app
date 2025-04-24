@@ -11,7 +11,6 @@ int Server::start() {
         std::cout << "Failed to bind socket" << std::endl;
         return -1;
     }
-
     // Listen on the bound socket
     if (listen(connection_socket_, 1) == SOCKET_ERROR) {
         std::cout << "Failed to listen on the socket" << std::endl;

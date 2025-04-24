@@ -1,20 +1,36 @@
 #include "main_window.h"
 #include <cwchar>
+#include <mutex>
+#include <thread>
+
+MainWindow::~MainWindow() {
+    delete client_;
+    delete server_;
+}
 
 int MainWindow::handle_command(WPARAM w_param, LPARAM l_param) {
     switch (LOWORD(w_param)) {
     case START_SERVER: {
-        if (server_) return 0;
+        if (server_) {
+            MessageBox(window_handle_, "Server is already running", "", MB_OK);
+            return 0;
+        }
+
         server_ = new Server("127.0.0.1", 8080);
         std::thread server_thread(&Server::start, server_);
         server_thread.detach();
+
         MessageBox(window_handle_, "Started Server on port 8080", "", MB_OK);
         return 0;
     }
     case START_CLIENT: {
-        if (client_) return 0;
+        if (client_) {
+            MessageBox(window_handle_, "Client is already running", "", MB_OK);
+            return 0;
+        }
+
         client_ = new Client("127.0.0.1", 8080);
-        client_->set_message_handler([this](const char x[]) {
+        client_->set_message_receiver_handler([this](const char* x) {
             PostMessage(
                 window_handle_,
                 WM_COMMAND,
@@ -22,24 +38,30 @@ int MainWindow::handle_command(WPARAM w_param, LPARAM l_param) {
                 reinterpret_cast<LPARAM>(x)
             );
         });
-        std::thread client_thread(&Client::start, client_);
-        client_thread.detach();
+        client_->set_message_sender_handler([this](char* buffer){
+            // Thread safety 
+            std::lock_guard<std::mutex> lock_guard(text_mutex_);
+
+            GetWindowText(text_window_, buffer, 256);
+            SetWindowText(text_window_, "");
+
+            return buffer;
+        });
+        client_->start();
+
         MessageBox(window_handle_, "Connected to Server", "", MB_OK);
         return 0;
     }
     case SEND_MESSAGE: {
-        char buffer[256];
-        GetWindowText(text_window_, buffer, sizeof(buffer));
-        client_->send_data(buffer);
-        SetWindowText(text_window_, "");
+        client_->send_request();
         return 0;
     }
     case DISPLAY_TEXT: {
-        char* msg = reinterpret_cast<char*>(l_param);
+        auto const* msg = reinterpret_cast<char*>(l_param);
         
-        display_text_ += "> ";
+        display_text_ += " > ";
         display_text_ += msg;
-        display_text_ += "\r\n ";
+        display_text_ += "\r\n";
 
         SetWindowText(display_window_, display_text_.c_str());
         return 0;
@@ -56,7 +78,7 @@ LPCSTR MainWindow::class_name() const {
 LRESULT MainWindow::handle_message(UINT msg, WPARAM w_param, LPARAM l_param) {
      // Handles the messages
     switch (msg) {
-     case WM_DESTROY:
+    case WM_DESTROY:
         PostQuitMessage(0);
         return 0;
     case WM_COMMAND:
@@ -65,8 +87,8 @@ LRESULT MainWindow::handle_message(UINT msg, WPARAM w_param, LPARAM l_param) {
         RECT rect;
         GetClientRect(window_handle_, &rect);
 
-        int width = rect.right - rect.left;
-        int height = rect.top - rect.bottom;
+        const int width = rect.right - rect.left;
+        const int height = rect.top - rect.bottom;
         
         CreateWindowW(
             L"button", L"Send",
