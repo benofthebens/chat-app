@@ -10,11 +10,11 @@ protected:
     SOCKET connection_socket_ = INVALID_SOCKET;
     WSAData wsa_data_;
     const std::string& host_;
-    const unsigned int port_;
+    unsigned int port_;
 public:
     ConnectionBase(const std::string& host, const unsigned int port);
     virtual ~ConnectionBase() = default;
-    virtual int send_msg(const SOCKET receiver_socket, const char message[]) = 0;
+    virtual int send_data(SOCKET receiver_socket, const char message[]) const = 0;
 };
 
 #endif

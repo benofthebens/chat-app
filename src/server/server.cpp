@@ -31,7 +31,7 @@ int Server::start() {
 
         // put it in the list of clients connected
         clients_.push_back(accept_socket);
-        broadcast_message("User has joined the Chat");
+        int _ = broadcast_message("User has joined the Chat");
 
         // Create thread per user connected 
         std::thread receive(&Server::receive, this, accept_socket);
@@ -49,24 +49,35 @@ void Server::receive(const SOCKET socket) {
         if (byte_count < 0) break;
 
         // Broadcast message to everyone except the client sent
-        broadcast_message(buffer);
+        int _ = broadcast_message(buffer);
    }
     // Remove the socket from the clients
-    clients_.erase(std::remove(clients_.begin(), clients_.end(), socket), clients_.end());
-    broadcast_message("A User has disconnected from the session");
+    clients_.erase(
+        std::remove(
+            clients_.begin(), 
+            clients_.end(), 
+            socket
+        ), 
+        clients_.end()
+    );
+
+    int _ = broadcast_message("A User has disconnected from the session");
 }
 
-int Server::send_msg(const SOCKET receiver_socket, const char message[]) {
+int Server::send_data(const SOCKET client_socket, const char message[]) const {
     // Send a message to the receiver socket with a length of 200
-    const int byte_count = send(receiver_socket, message, 256, 0);
-    if (byte_count == SOCKET_ERROR ) return -1;
+    const int byte_count = send(client_socket, message, 256, 0);
+    if (byte_count == SOCKET_ERROR) 
+        return SOCKET_ERROR;
+
     return 0;
 }
 
-int Server::broadcast_message(const char message[]) {
+int Server::broadcast_message(const char message[]) const {
     // Send message to every client
     for (const SOCKET client : clients_) {
-        send_msg(client, message);
+        if (send_data(client, message) == SOCKET_ERROR) return -1;
     }
+
     return 0;
 }

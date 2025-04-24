@@ -12,7 +12,8 @@ public:
     Client(const std::string& host, const unsigned int port) : ConnectionBase(host, port) {}
     ~Client() override = default;
     int start();
-    int send_msg(const SOCKET receiver_socket, const char message[]) override;
+    int send_data(SOCKET server_socket, const char message[]) const override;
+    int send_data(const char message[]) const;
     int receiver() const;
     void set_message_handler(std::function<void(const char[])> message_handler);
 };

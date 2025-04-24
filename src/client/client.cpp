@@ -22,8 +22,19 @@ int Client::start() {
         //send_msg(connection_socket_, buffer);
     }
 }
+int Client::send_data(SOCKET server_socket, const char message[]) const {
+    const int byte_count = send(server_socket, message, 256, 0);
 
-int Client::send_msg(const SOCKET receiver_socket, const char message[]) {
+    // Error checking 
+    if (byte_count == SOCKET_ERROR) {
+        std::cout << "Unable to send message" << std::endl;
+        return -1;
+    }
+
+    return 0;
+
+}
+int Client::send_data(const char message[]) const {
     // Send the message to the receiver socket of length 200
     const int byte_count = send(connection_socket_, message, 256, 0);
 
@@ -35,7 +46,6 @@ int Client::send_msg(const SOCKET receiver_socket, const char message[]) {
 
     return 0;
 }
-
 int Client::receiver() const {
     while (true) {
         char buffer[256]; // buffer to write to
@@ -53,7 +63,6 @@ int Client::receiver() const {
             message_handler_(buffer);
     }
 }
-
 void Client::set_message_handler(std::function<void(const char[])> message_handler) {
     message_handler_ = message_handler;
 }

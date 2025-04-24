@@ -1,7 +1,6 @@
 #include "main_window.h"
 #include <cwchar>
 
-
 int MainWindow::handle_command(WPARAM w_param, LPARAM l_param) {
     switch (LOWORD(w_param)) {
     case START_SERVER: {
@@ -31,7 +30,7 @@ int MainWindow::handle_command(WPARAM w_param, LPARAM l_param) {
     case SEND_MESSAGE: {
         char buffer[256];
         GetWindowText(text_window_, buffer, sizeof(buffer));
-        client_->send_msg(NULL, buffer);
+        client_->send_data(buffer);
         SetWindowText(text_window_, "");
         return 0;
     }

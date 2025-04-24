@@ -16,8 +16,8 @@ public:
     ) : ConnectionBase(host, port) {}
     ~Server() override = default;
     int start();
-    int send_msg(const SOCKET receiver_socket, const char message[]) override;
-    int broadcast_message(const char message[]);
+    int send_data(const SOCKET client_socket, const char message[]) const override ;
+    int broadcast_message(const char message[]) const;
 };
 
 #endif
