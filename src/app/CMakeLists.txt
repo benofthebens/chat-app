@@ -4,7 +4,7 @@ add_executable(App WIN32
  )
 
 target_include_directories(App PRIVATE 
-    "../../include"
+    "../../include/app"
     "../../include/network_core"
 )
 

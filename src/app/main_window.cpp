@@ -12,7 +12,7 @@ int MainWindow::handle_command(WPARAM w_param, LPARAM l_param) {
     switch (LOWORD(w_param)) {
     case START_SERVER: {
         if (server_) {
-            MessageBox(window_handle_, "Server is already running", "", MB_OK);
+            MessageBox(window_handle_, "Server is already running", "", MB_OK );
             return 0;
         }
 
@@ -20,7 +20,7 @@ int MainWindow::handle_command(WPARAM w_param, LPARAM l_param) {
         std::thread server_thread(&Server::start, server_);
         server_thread.detach();
 
-        MessageBox(window_handle_, "Started Server on port 8080", "", MB_OK);
+        MessageBox(window_handle_, "Started Server on port 8080", "", MB_OK | MB_ICONINFORMATION);
         return 0;
     }
     case START_CLIENT: {

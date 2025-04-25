@@ -56,6 +56,22 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
+        },
+        {
+            "name": "mingw-debug",
+            "displayName": "MinGW Debug",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "g++.exe",
+                "CMAKE_C_COMPILER": "gcc.exe",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
         }
     ]
 }

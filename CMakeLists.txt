@@ -7,9 +7,4 @@ project ("chat-app")
 
 add_subdirectory("./src")
 enable_testing()
-add_subdirectory("./tests")
-
-include_directories("./include")
-
-
-# TODO: Add tests and install targets if needed.
+add_subdirectory("test")
