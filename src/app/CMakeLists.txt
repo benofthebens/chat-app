@@ -1,7 +1,8 @@
 add_executable(App WIN32
     "main.cpp"
     "main_window.cpp"
- )
+    "dialog_window.cpp"
+)
 
 target_include_directories(App PRIVATE 
     "../../include/app"

@@ -22,10 +22,12 @@ int Server::start() {
     while (true) {
         // Waits for accept of connections
         SOCKET accept_socket = accept(connection_socket_, nullptr, nullptr);
+
         if (accept_socket == INVALID_SOCKET) {
             std::cout << "failed to accept" << std::endl;
             continue;
         }
+
         std::cout << "Client has connected to server" << std::endl;
 
         // put it in the list of clients connected
@@ -66,8 +68,10 @@ void Server::receive(const SOCKET socket) {
 int Server::send_data(const SOCKET client_socket, const char message[]) const {
     // Send a message to the receiver socket with a length of 200
     const int byte_count = send(client_socket, message, 256, 0);
-    if (byte_count == SOCKET_ERROR) 
+
+    if (byte_count == SOCKET_ERROR) {
         return SOCKET_ERROR;
+    }
 
     return 0;
 }
@@ -75,7 +79,7 @@ int Server::send_data(const SOCKET client_socket, const char message[]) const {
 int Server::broadcast_message(const char message[]) const {
     // Send message to every client
     for (const SOCKET client : clients_) {
-        if (send_data(client, message) == SOCKET_ERROR) return -1;
+        if (send_data(client, message) == SOCKET_ERROR) { return -1; }
     }
 
     return 0;

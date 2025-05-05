@@ -3,6 +3,14 @@
 
 #include <Windows.h>
 
+#define DISPLAY_TEXT 4
+#define START_SERVER 5
+#define START_CLIENT 6
+#define SEND_MESSAGE 7
+#define CHOOSE_SOCKET 8
+#define CREATE_SERVER_DIALOG 9
+#define CREATE_CLIENT_DIALOG 10
+
 template <class DerivedClass>
 class WindowBase{
 protected:
@@ -10,6 +18,7 @@ protected:
     virtual LRESULT handle_message(UINT msg, WPARAM w_param, LPARAM l_param) = 0;
 
     HWND window_handle_;
+    HWND parent_window_handle_ = nullptr;
 public:
     WindowBase() : window_handle_(nullptr) {}
     virtual ~WindowBase() = default;
@@ -57,6 +66,8 @@ public:
         wnd.lpfnWndProc = DerivedClass::win_proc;
         wnd.hInstance = GetModuleHandle(nullptr);
         wnd.lpszClassName = class_name();
+
+        parent_window_handle_ = parent_window_handle;
 
         RegisterClass(&wnd);
 

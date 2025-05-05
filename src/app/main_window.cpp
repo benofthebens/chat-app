@@ -2,6 +2,7 @@
 #include <cwchar>
 #include <mutex>
 #include <thread>
+#include <dialog_window.h>
 
 MainWindow::~MainWindow() {
     delete client_;
@@ -15,41 +16,77 @@ int MainWindow::handle_command(WPARAM w_param, LPARAM l_param) {
             MessageBox(window_handle_, "Server is already running", "", MB_OK );
             return 0;
         }
+        Socket* socket = (Socket*)l_param;
 
-        server_ = new Server("127.0.0.1", 8080);
+        server_ = new Server(socket->host, socket->port);
         std::thread server_thread(&Server::start, server_);
         server_thread.detach();
 
-        MessageBox(window_handle_, "Started Server on port 8080", "", MB_OK | MB_ICONINFORMATION);
+        std::string success_msg = "Started server on port " + std::to_string(socket->port);
+
+        MessageBox(window_handle_, success_msg.c_str(), "", MB_OK | MB_ICONINFORMATION);
+
+        delete socket;
         return 0;
+    }
+    case CREATE_SERVER_DIALOG: {
+        dialog_window_.create(
+            "dialog",
+            WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+            NULL,
+            400, 400,
+            200,
+            200,
+            window_handle_
+        );
+        dialog_window_.set_target_command(START_SERVER);
+        return 0;
+    }
+    case CREATE_CLIENT_DIALOG: {
+        dialog_window_.create(
+            "dialog",
+            WS_OVERLAPPEDWINDOW | WS_VISIBLE, 
+            NULL,
+            400,
+            400,
+            200,
+            200,
+            window_handle_
+        );
+        dialog_window_.set_target_command(START_CLIENT);
+ 
+        return 0;
+
     }
     case START_CLIENT: {
         if (client_) {
             MessageBox(window_handle_, "Client is already running", "", MB_OK);
             return 0;
         }
+        Socket* socket = (Socket*)l_param;
 
-        client_ = new Client("127.0.0.1", 8080);
-        client_->set_message_receiver_handler([this](const char* x) {
+        client_ = new Client(socket->host, socket->port); 
+        client_->set_message_receiver_handler([this](const char* buffer) {
             PostMessage(
                 window_handle_,
                 WM_COMMAND,
                 DISPLAY_TEXT,
-                reinterpret_cast<LPARAM>(x)
+                reinterpret_cast<LPARAM>(buffer)
             );
         });
-        client_->set_message_sender_handler([this](char* buffer){
+        client_->set_message_sender_handler([this](char* buffer) {
             // Thread safety 
             std::lock_guard<std::mutex> lock_guard(text_mutex_);
 
             GetWindowText(text_window_, buffer, 256);
-            SetWindowText(text_window_, "");
+            SetWindowText(text_window_, ""); // clear input
 
             return buffer;
         });
         client_->start();
 
         MessageBox(window_handle_, "Connected to Server", "", MB_OK);
+        delete socket;
         return 0;
     }
     case SEND_MESSAGE: {
@@ -87,8 +124,8 @@ LRESULT MainWindow::handle_message(UINT msg, WPARAM w_param, LPARAM l_param) {
         RECT rect;
         GetClientRect(window_handle_, &rect);
 
-        const int width = rect.right - rect.left;
-        const int height = rect.top - rect.bottom;
+        const unsigned int width = rect.right - rect.left;
+        const unsigned int height = rect.top - rect.bottom;
         
         CreateWindowW(
             L"button", L"Send",
@@ -99,36 +136,52 @@ LRESULT MainWindow::handle_message(UINT msg, WPARAM w_param, LPARAM l_param) {
         );
 
         text_window_ = CreateWindowW(
-            L"edit",L"",
+            L"edit",
+            L"",
             WS_VISIBLE | WS_CHILD,
-            50, 300, width - 100, 50,
+            50,
+            300, 
+            width - 100,
+            20,
             window_handle_,
             NULL, NULL, NULL
         );
 
         display_window_ = CreateWindowW(
-            L"edit",L"",
+            L"edit",
+            L"",
             WS_VISIBLE | WS_CHILD | WS_BORDER | WS_VSCROLL |
             ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY,
-            50, 50, width - 100, 200,
+            50, 
+            50, 
+            width - 100,
+            200,
             window_handle_,
             NULL, NULL, NULL 
         );
 
         CreateWindowW(
-            L"button", L"Start Server",
+            L"button", 
+            L"Start Server",
             WS_VISIBLE | WS_CHILD,
-            width - 150, 400, 100, 50,
+            width - 150,
+            400,
+            100,
+            50,
             window_handle_,
-            (HMENU)START_SERVER, NULL, NULL
+            (HMENU)CREATE_SERVER_DIALOG, NULL, NULL
         );
 
         CreateWindowW(
-            L"button", L"Connect",
+            L"button", 
+            L"Connect",
             WS_VISIBLE | WS_CHILD,
-            width - 250, 400, 100, 50,
+            width - 250, 
+            400,
+            100, 
+            50,
             window_handle_,
-            (HMENU)START_CLIENT, NULL, NULL
+            (HMENU)CREATE_CLIENT_DIALOG, NULL, NULL
         );
         
         return 0;

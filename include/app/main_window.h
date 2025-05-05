@@ -6,16 +6,14 @@
 #include "client.h"
 #include "server.h"
 #include "window_base.h"
-
-#define DISPLAY_TEXT 4
-#define START_SERVER 5
-#define START_CLIENT 6
-#define SEND_MESSAGE 7
+#include "dialog_window.h"
 
 class MainWindow : public WindowBase<MainWindow> {
 private:
     HWND text_window_ = nullptr;
     HWND display_window_ = nullptr;
+    DialogWindow dialog_window_;
+
     Server* server_ = nullptr;
     Client* client_ = nullptr;
     std::string display_text_;
