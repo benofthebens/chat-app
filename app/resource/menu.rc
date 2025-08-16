@@ -1,0 +1,29 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+/////////////////////////////////////////////////////////////////////////////
+// English (United Kingdom) resources
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAIN_MENU MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "E&xit",                       ID_FILE_EXIT
+    END
+    POPUP "Session"
+    BEGIN
+        MENUITEM "Client",                      ID_SESSION_CLIENT
+        MENUITEM "Server",                      ID_SESSION_SERVER
+    END
+    MENUITEM "&Start",                      ID_START
+END
+
+
+IDB_SEND_IMG ICON "send_icon.ico"
+

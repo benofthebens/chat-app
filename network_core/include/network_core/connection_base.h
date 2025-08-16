@@ -3,6 +3,7 @@
 
 #include <WinSock2.h>
 #include <string>
+#include "message.h"
 
 class ConnectionBase {
 protected:
@@ -10,11 +11,12 @@ protected:
     SOCKET connection_socket_ = INVALID_SOCKET;
     WSAData wsa_data_;
     const std::string& host_;
-    unsigned int port_;
+    uint32_t port_;
 public:
-    ConnectionBase(const std::string& host, const unsigned int port);
+    ConnectionBase(const std::string& host, uint32_t port);
     virtual ~ConnectionBase() = default;
-    virtual int send_data(SOCKET receiver_socket, const char message[]) const = 0;
+    virtual int Start() = 0;
+    virtual int Shutdown() = 0;
 };
 
 #endif
