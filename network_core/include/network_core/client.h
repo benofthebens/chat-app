@@ -17,11 +17,10 @@ private:
     int Receiver() const;
     int Sender();
 public:
-    Client(const std::string& host, const unsigned int port) : ConnectionBase(host, port) {}
+    Client(const std::string& host, const uint16_t port) : ConnectionBase(host, port) {}
     ~Client() override = default;
     int Start() override;
     int Shutdown() override;
-    int SendData(SOCKET server_socket, const char message[]) const;
     int SendData(Message* message) const;
     void SendRequest() { sending_ = true; }
     bool is_running() { return running_; }

@@ -1,56 +1,55 @@
 #include "chat_view.h"
 
-#include <mutex>
-#include <vector>
-#include <string>
-#include "message.h"
-
-std::vector<Message> msgs = {};
 
 constexpr int kLineHeight = 30;
 constexpr int kMargin = 30;
 constexpr int kYPadding = 4;
 constexpr int kXPadding = 7;
 
-static size_t scroll_pos = 0;
+ChatView::ChatView() {
 
-void AddMessage(HWND hwnd, Message* msg) {
-    msgs.push_back(*msg);
-    InvalidateRect(hwnd, nullptr, TRUE);
 }
 
+void ChatView::HandleScroll(WPARAM w_param, LPARAM l_param) {
+    const INT scroll_type = LOWORD(w_param);
 
-void ChatViewUpdateScrollInfo(const HWND hwnd) {
-    RECT rect;
-    GetClientRect(hwnd, &rect);
-    const int lines_visible = (rect.bottom - rect.top) / kLineHeight;
+    SCROLLINFO si;
+    si.cbSize = sizeof(SCROLLINFO);
+    si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS | SIF_TRACKPOS;
+    GetScrollInfo(hwnd_, SB_VERT, &si);
 
-    SCROLLINFO si = {};
-    si.cbSize = sizeof(si);
-    si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
-    si.nMin = 0;
-    si.nMax = static_cast<int>(msgs.size());
-    si.nPage = lines_visible;
-    si.nPos = scroll_pos;
+    int position = 0;
+    switch (scroll_type) {
+    case SB_TOP:position = si.nMin; break;
+    case SB_BOTTOM:position = si.nMax; break;
+    case SB_LINEUP:position = --si.nPos; break;
+    case SB_LINEDOWN:position = ++si.nPos; break;
+    case SB_THUMBTRACK:position = si.nTrackPos; break;
+    default:
+    case SB_THUMBPOSITION:position = si.nPos; break;
+    }
 
-    SetScrollInfo(hwnd, SB_VERT, &si, TRUE);
+    SetScrollPos(hwnd_, SB_VERT, position, TRUE);
+    scroll_position_ = position;
+    InvalidateRect(hwnd_, nullptr, TRUE);
+
 }
 
-static void ChatViewPaint(const HWND hwnd) {
+void ChatView::HandlePaint(WPARAM w_param, LPARAM l_param) {
     PAINTSTRUCT ps;
 
     RECT client;
-    GetClientRect(hwnd, &client);
-    const LONG client_width = Width(client);
+    GetClientRect(hwnd_, &client);
+    const INT client_width = Width();
 
-    const HDC hdc = BeginPaint(hwnd, &ps);
+    const HDC hdc = BeginPaint(hwnd_, &ps);
 
     FillRect(hdc, &client, nullptr);
 
-    const size_t lines_visible = Height(client) / kLineHeight;
+    const size_t lines_visible = Height() / kLineHeight;
 
-    for (size_t i = 0; i < lines_visible && (i + scroll_pos) < msgs.size(); ++i) {
-        const Message msg = msgs[i + scroll_pos];
+    for (size_t i = 0; i < lines_visible && (i + scroll_position_) < messages_.size(); ++i) {
+        const Message msg = messages_[i + scroll_position_];
         const int y = i * kLineHeight;
 
         RECT server_msg_rect = { client.left, y, client.right,y + kLineHeight };
@@ -60,8 +59,8 @@ static void ChatViewPaint(const HWND hwnd) {
             RECT text_rect = { 0, y, client_width / 2, 0 };
             DrawText(hdc, msg.data, -1, &text_rect, DT_WORDBREAK | DT_CALCRECT | DT_EDITCONTROL);
 
-            const LONG text_width = Width(text_rect);
-            text_rect.left = msg.is_sender ? client.right - text_width - kMargin : text_rect.left + kMargin; 
+            const LONG text_width = ::Width(text_rect);
+            text_rect.left = msg.is_sender ? client.right - text_width - kMargin : text_rect.left + kMargin;
             text_rect.right = msg.is_sender ? client.right - kMargin : text_rect.right + kMargin;
 
             const HGDIOBJ brush = msg.is_sender ? GetStockObject(DKGRAY_BRUSH) : GetStockObject(GRAY_BRUSH);
@@ -100,63 +99,10 @@ static void ChatViewPaint(const HWND hwnd) {
             break;
         }
     }
-    EndPaint(hwnd, &ps);
+    EndPaint(hwnd_, &ps);
 }
 
-static void ChatViewScroll(const HWND hwnd, const WPARAM w_param, const LPARAM l_param) {
-
-    SCROLLINFO si;
-    si.cbSize = sizeof(SCROLLINFO);
-    si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS | SIF_TRACKPOS;
-    GetScrollInfo(hwnd, SB_VERT, &si);
-
-    int position;
-    switch (LOWORD(w_param)) {
-    case SB_TOP:
-        position = si.nMin; break;
-    case SB_BOTTOM:
-        position = si.nMax; break;
-    case SB_LINEUP:
-        position = si.nPos - 1; break;
-    case SB_LINEDOWN:
-        position = si.nPos + 1; break;
-    case SB_THUMBTRACK:
-        position = si.nTrackPos; break;
-    default:
-    case SB_THUMBPOSITION:
-        position = si.nPos; break;
-    }
-
-    SetScrollPos(hwnd, SB_VERT, position, TRUE);
-    position = GetScrollPos(hwnd, SB_VERT);
-
-    scroll_pos = position;
-
-    InvalidateRect(hwnd, nullptr, TRUE);
-}
-
-LRESULT CALLBACK ChatViewWinProc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param) {
-    switch (msg) {
-    case WM_VSCROLL: {
-        ChatViewScroll(hwnd, w_param, l_param);
-        return 0;
-    }
-    case WM_PAINT: {
-        ChatViewPaint(hwnd);
-        return 0;
-    }
-    default: 
-        return DefWindowProc(hwnd, msg, w_param, l_param);
-    }
-}
-
-void ChatViewRegister() {
-    WNDCLASS wnd = {};
-    wnd.lpfnWndProc = ChatViewWinProc;
-    wnd.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wnd.lpszClassName = CHAT_VIEW_WC;
-
-    RegisterClass(&wnd);
-}
+void ChatView::HandleSize(WPARAM w_param, LPARAM l_param) {
+     }
 
 

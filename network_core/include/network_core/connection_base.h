@@ -11,9 +11,9 @@ protected:
     SOCKET connection_socket_ = INVALID_SOCKET;
     WSAData wsa_data_;
     const std::string& host_;
-    uint32_t port_;
+    uint16_t port_;
 public:
-    ConnectionBase(const std::string& host, uint32_t port);
+    ConnectionBase(const std::string& host, uint16_t port);
     virtual ~ConnectionBase() = default;
     virtual int Start() = 0;
     virtual int Shutdown() = 0;

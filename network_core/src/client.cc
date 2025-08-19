@@ -10,7 +10,7 @@ int Client::Start() {
         return -1;
     }
 
-    if (!message_sender_handler_) { return -1; }
+    if (!message_sender_) { return -1; }
 
     running_ = true;
 
@@ -29,17 +29,6 @@ int Client::Shutdown() {
     return 0;
 }
 
-int Client::SendData(SOCKET server_socket, const char message[]) const {
-    const int byte_count = send(server_socket, message, 256, 0);
-
-    // Error checking 
-    if (byte_count == SOCKET_ERROR) {
-        std::cout << "Unable to send message" << "\n";
-        return -1;
-    }
-
-    return 0;
-}
 int Client::SendData(Message* message) const {
     // Send the message to the receiver socket of length 200
     const int byte_count = send(connection_socket_, reinterpret_cast<char*>(message), sizeof(Message), 0);
@@ -52,6 +41,7 @@ int Client::SendData(Message* message) const {
 
     return 0;
 }
+
 int Client::Receiver() const {
     while (running_) {
         Message msg;
@@ -62,8 +52,8 @@ int Client::Receiver() const {
         if (byte_count < 0) { break; }
 
         // Output to client's console
-        if (message_receiver_handler_) {
-            message_receiver_handler_(&msg);
+        if (message_receiver_) {
+            message_receiver_(&msg);
         }
     }
     return 0;
@@ -72,7 +62,7 @@ int Client::Sender() {
     while (running_) {
         if (sending_) {
             Message msg;
-            message_sender_handler_(&msg);
+            message_sender_(&msg);
             sending_ = false;
             int _ = SendData(&msg);
         }

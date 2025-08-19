@@ -1,11 +1,11 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include <atomic>
-
 #include "connection_base.h"
 #include "message.h"
+
 #include <vector>
+#include <atomic>
 #include <WinSock2.h>
 
 class Server : public ConnectionBase {
@@ -17,7 +17,7 @@ private:
 public:
     Server(
         const std::string& host,
-        const unsigned int port
+        const uint16_t port
     ) : ConnectionBase(host, port) {}
     ~Server() override = default;
     int Start() override;
