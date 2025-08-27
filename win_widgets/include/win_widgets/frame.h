@@ -81,16 +81,16 @@ template <typename Control>
 class __declspec(dllexport) Frame : public IFrame {
 protected:
     HWND hwnd_ = nullptr;
-    std::unordered_map<uint32_t, Event> handlers_ = {};
+    std::unordered_map<uint32_t, Event> events_ = {};
 private:
     void HandleScroll(WPARAM w_param, LPARAM l_param) override {}
     void HandleCreate(WPARAM w_param, LPARAM l_param) override {}
     void HandlePaint(WPARAM w_param, LPARAM l_param) override {}
     void HandleSize(WPARAM w_param, LPARAM l_param) override {}
-    void HandleCommand(WPARAM w_param, LPARAM l_param) override {
+    void HandleCommand(WPARAM w_param, LPARAM l_param) final {
         const int cmd = LOWORD(w_param);
-        const auto iterator = handlers_.find(cmd);
-        if (iterator == handlers_.end()) { return; }
+        const auto iterator = events_.find(cmd);
+        if (iterator == events_.end()) { return; }
         iterator->second(w_param, l_param);
     }
 public:
@@ -103,7 +103,7 @@ public:
      * @param cmd The cmd id that is used when an event is triggered 
      * @param event The callback function command
      */
-    void Bind(const uint32_t cmd, Event event) { handlers_[cmd] = std::move(event); }
+    void Bind(const uint32_t cmd, Event event) { events_[cmd] = std::move(event); }
     virtual LPCSTR class_name() = 0;
 
     /**
@@ -134,7 +134,7 @@ public:
      * @return -1 if hwnd_ has not been created
      * else returns width
      */
-    INT Width() const {
+    INT ClientWidth() const {
         if (!hwnd_) { return -1; }
         RECT client;
         GetClientRect(hwnd_, &client);
@@ -146,7 +146,7 @@ public:
      * @return -1  if hwnd_ has not been created
      * else returns height
      */
-    INT Height() const {
+    INT ClientHeight() const {
         if (!hwnd_) { return -1; }
         RECT client;
         GetClientRect(hwnd_, &client);

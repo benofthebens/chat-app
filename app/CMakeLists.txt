@@ -1,4 +1,4 @@
-add_executable(App WIN32 "src/main_window.cc" "src/main.cc" "src/chat_view.cc" "include/app/chat_view.h" "resource/resource.h" "include/app/chat_app.h" "include/app/main_window.h")
+add_executable(App WIN32 "src/main_window.cc" "src/main.cc" "src/chat_view.cc" "include/app/chat_view.h" "resource/resource.h" "include/app/chat_app.h" "include/app/main_window.h"  )
 
 target_include_directories(App PRIVATE "include/app" "resource/")
 

@@ -1,8 +1,6 @@
 #pragma comment(lib, "Ws2_32.lib")
 
 #include "main_window.h"
-
-#include "chat_app.h"
 #include "win_widgets/frame_builder.h"
 #include <Windows.h>
 #include "resource.h"

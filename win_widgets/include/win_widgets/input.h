@@ -1,11 +1,15 @@
 #ifndef INPUT_H
 #define INPUT_H
+
 #include "frame.h"
-class Input : public Frame<Input> {
+
+#define EDIT_WC "EDIT"
+
+class Input final : public Frame<Input> {
 public:
-    LPCSTR class_name() override { return "EDIT"; }
+    LPCSTR class_name() override { return EDIT_WC; }
     Input() = default;
-    ~Input() = default;
+    ~Input() override = default;
 };
 
 #endif

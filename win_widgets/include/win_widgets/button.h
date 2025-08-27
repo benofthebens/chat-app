@@ -3,13 +3,13 @@
 
 #include "frame.h"
 
-constexpr uint32_t kOnClick = 1001;
+#define BUTTON_WC "BUTTON"
 
-class Button : public Frame<Button> {
+class Button final : public Frame<Button> {
 public:
-    LPCSTR class_name() override { return "BUTTON"; }
+	LPCSTR class_name() override { return BUTTON_WC; }
 	Button() = default;
-	~Button() = default;
+	~Button() override = default;
 };
 
 #endif

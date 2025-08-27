@@ -9,16 +9,15 @@
 #include "chat_app.h"
 #include <mutex>
 #include <vector>
+
 #define CHAT_VIEW_WC "CHAT_VIEW"
 
-
-class ChatView : public Window<ChatView> {
+class ChatView final : public Window<ChatView> {
 private:
 	std::vector<Message> messages_ = {};
-	int scroll_position_ = 0;
 public:
-	ChatView();
-	void PushMessage(Message* message) { messages_.push_back(*message); }
+	ChatView() = default;
+	void AddMessage(Message* message);
 	LPCSTR class_name() override { return CHAT_VIEW_WC; }
 private:
 	void HandleScroll(WPARAM w_param, LPARAM l_param) override;
