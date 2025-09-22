@@ -1,0 +1,1 @@
+#include "network_core/application_client.h"

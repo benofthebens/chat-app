@@ -1,4 +1,4 @@
-add_library(NetworkCore "src/client.cc" "src/server.cc" "src/connection_base.cc" "include/network_core/server.h" "include/network_core/client.h" "include/network_core/connection_base.h" "include/network_core/message.h")
+add_library(NetworkCore "src/connection.cc" "include/network_core/connection.h"  "include/network_core/protocol_handler.h"  "src/socket.cc" "src/protocol_handler.cc" "include/network_core/session.h" "include/network_core/application_server.h" "src/session.cc" "src/application_server.cc" "include/network_core/application_client.h" "src/application_client.cc")
 
 target_link_libraries(NetworkCore PRIVATE ws2_32)
-target_include_directories(NetworkCore PUBLIC "include/network_core")
+target_include_directories(NetworkCore PUBLIC "include")
