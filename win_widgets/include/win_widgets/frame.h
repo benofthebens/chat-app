@@ -71,6 +71,7 @@ public:
      *        If the scroll bar is part of the window’s standard scroll bars, this value is NULL.
      */
     virtual void HandleScroll(WPARAM w_param, LPARAM l_param) = 0;
+    virtual void HandleDrawItem(WPARAM w_param, LPARAM l_param) = 0;
 };
 
 /**
@@ -87,6 +88,7 @@ private:
     void HandleCreate(WPARAM w_param, LPARAM l_param) override {}
     void HandlePaint(WPARAM w_param, LPARAM l_param) override {}
     void HandleSize(WPARAM w_param, LPARAM l_param) override {}
+    void HandleDrawItem(WPARAM w_param, LPARAM l_param) override {}
     void HandleCommand(WPARAM w_param, LPARAM l_param) final {
         const int cmd = LOWORD(w_param);
         const auto iterator = events_.find(cmd);
@@ -130,30 +132,6 @@ public:
     }
 
     /**
-     * @brief Calculates the width of the client rect
-     * @return -1 if hwnd_ has not been created
-     * else returns width
-     */
-    INT ClientWidth() const {
-        if (!hwnd_) { return -1; }
-        RECT client;
-        GetClientRect(hwnd_, &client);
-        return client.right - client.left;
-    }
-
-    /**
-     * @brief Calculates the height of the client rect
-     * @return -1  if hwnd_ has not been created
-     * else returns height
-     */
-    INT ClientHeight() const {
-        if (!hwnd_) { return -1; }
-        RECT client;
-        GetClientRect(hwnd_, &client);
-        return client.bottom - client.top;
-    }
-
-    /**
      * @brief Executes corresponding method based on message
      * @param hwnd the handle of the window
      * @param msg the message 
@@ -163,11 +141,12 @@ public:
     void HandleMessage(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param) {
         switch (msg) {
         case WM_PAINT:      HandlePaint(w_param, l_param);      break;
+        case WM_DRAWITEM:   HandleDrawItem(w_param, l_param);   break;
         case WM_COMMAND:    HandleCommand(w_param, l_param);    break;
         case WM_SIZE:       HandleSize(w_param, l_param);       break;
         case WM_CREATE:     HandleCreate(w_param, l_param);     break;
         case WM_VSCROLL:    HandleScroll(w_param, l_param);     break;
-        case WM_DESTROY:    PostQuitMessage(0);         break;
+        case WM_DESTROY:    PostQuitMessage(0);        break;
         default: break;
         }
     }
@@ -184,7 +163,7 @@ public:
         Control* instance = nullptr;
 
         if (msg == WM_NCCREATE) {
-            auto* create_struct = reinterpret_cast<CREATESTRUCT*>(l_param);
+            auto* create_struct = reinterpret_cast<LPCREATESTRUCT>(l_param);
             instance = static_cast<Control*>(create_struct->lpCreateParams);
             SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(instance));
             instance->hwnd_ = hwnd;
