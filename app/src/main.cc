@@ -2,14 +2,15 @@
 
 #include "main_window.h"
 #include "win_widgets/frame_builder.h"
-#include <Windows.h>
 #include "resource.h"
-
-//SendMessage(send_hwnd, BM_SETIMAGE, IMAGE_ICON, reinterpret_cast<LPARAM>(send_icon));
+#include <Windows.h>
 
 int WINAPI WinMain(HINSTANCE h_instance, HINSTANCE h_prev_instance, LPSTR lp_cmd_line, int n_cmd_show) {
 
-    //send_icon = LoadIcon(h_instance, MAKEINTRESOURCE(IDB_SEND_IMG));
+    constexpr WORD version_requested = MAKEWORD(2, 2); // gets the version requested
+    WSADATA wsa_data;
+
+    if (WSAStartup(version_requested, &wsa_data) != 0) { return -1; }
 
     const auto window = FrameBuilder<MainWindow>()
         .Name("chat-app")
@@ -25,6 +26,7 @@ int WINAPI WinMain(HINSTANCE h_instance, HINSTANCE h_prev_instance, LPSTR lp_cmd
     CheckMenuItem(menu, ID_SESSION_CLIENT, MF_UNCHECKED);
 
     MSG msg = {};
+
     // Dequeues the message queue and store at &msg
     while (GetMessage(&msg, nullptr, 0, 0) > 0) {
         TranslateMessage(&msg);

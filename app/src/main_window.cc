@@ -1,29 +1,45 @@
 #include "main_window.h"
+#include "resource.h"
+#include "win_widgets/frame_builder.h"
+#include <mutex>
 
 enum Command : uint32_t {
     kSend = 1001,
 };
 
 MainWindow::MainWindow() {
-    Bind(kSend, [this](WPARAM w_param, LPARAM l_param) { client_.SendRequest(); });
-    Bind(ID_SESSION_SERVER, [this](WPARAM w_param, LPARAM l_param) {
+    /* Binds callbacks */
+    client_.on_connect_ = [this]{ MessageBox(hwnd_, "Connected to Server", "", MB_OK); };
+    client_.on_message_ = [this](const Message& msg) { MessageBox(hwnd_, msg.data, "", MB_OK);};
+    server_.on_message_ = [this](Session<Message>& session, const Message& msg) { server_.SendAll(msg); };
+    /* Binding of commands to lambda */
+    Bind(ID_SESSION_SERVER, [this](LPARAM l_param, WPARAM w_param){
         server_enabled_ = HandleToggle(ID_SESSION_SERVER);
     });
-    Bind(ID_SESSION_CLIENT, [this](WPARAM w_param, LPARAM l_param) {
+    Bind(ID_SESSION_CLIENT, [this](LPARAM l_param, WPARAM w_param) {
         client_enabled_ = HandleToggle(ID_SESSION_CLIENT);
     });
-    Bind(ID_START, [this](WPARAM w_param, LPARAM l_param) {
-        if (server_enabled_) { server_.Start(); }
-        if (client_enabled_) { client_.Start(); }
+    Bind(ID_START, [this](LPARAM l_param, WPARAM w_param) {
+        Socket socket{ "127.0.0.1", 8080 };
+        if (server_enabled_) {
+            std::thread server_thread(&ApplicationServer<Message>::Run, &server_, socket);
+            server_thread.detach();
+        }
+        if (client_enabled_) {
+            std::thread client_thread(&ApplicationClient<Message>::Run, &client_, socket);
+            client_thread.detach();
+        }
     });
-    client_.set_message_receiver([this](Message* msg) { AddMessage(msg); });
-    client_.set_message_sender([this](Message* msg) {
+    Bind(kSend, [this](LPARAM l_param, WPARAM w_param) {
         std::mutex mtx;
         std::lock_guard lock_guard(mtx);
-        
-        GetWindowText(message_box_->hwnd(), reinterpret_cast<char*>(&msg->data), kMaxDataSize - 1);
-        if (strlen(msg->data) == 0) { return; }
+
+        Message buf;
+        GetWindowText(message_box_->hwnd(), reinterpret_cast<char*>(&buf),sizeof(Message));
+        if (strlen(buf.data) == 0) { return; }
         SetWindowText(message_box_->hwnd(), "");
+
+        client_.Send(buf);
     });
 }
 
@@ -36,27 +52,48 @@ bool MainWindow::HandleToggle(UINT menu_id) const {
     return toggle_state;
 }
 
+void MainWindow::HandleDrawItem(WPARAM w_param, LPARAM l_param) {
+    const auto dis = reinterpret_cast<LPDRAWITEMSTRUCT>(l_param);
+    if (dis->CtlID == kSend) {
+        RECT client = dis->rcItem;
+        FillRect(dis->hDC, &client, nullptr);
+
+        SelectObject(dis->hDC, GetStockObject(NULL_PEN));
+        const HBRUSH bkg = CreateSolidBrush(RGB(150, 150, 150));
+        SelectObject(dis->hDC, bkg);
+
+        RoundRect(dis->hDC, client.left, client.top, client.right, client.bottom, 25, 25);
+
+        SetBkMode(dis->hDC, TRANSPARENT);
+        DrawText(dis->hDC, "Hello", -1, &client, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+
+        DeleteObject(bkg);
+    }
+}
+
 void MainWindow::HandlePaint(WPARAM w_param, LPARAM l_param) {
     PAINTSTRUCT ps;
-    RECT client_rect;
-    GetClientRect(hwnd_, &client_rect);
+    RECT client;
+    GetClientRect(hwnd_, &client);
 
     const HDC hdc = BeginPaint(hwnd_, &ps);
 
-    FillRect(hdc, &client_rect, nullptr);
+    FillRect(hdc, &client, nullptr);
 
     EndPaint(hwnd_, &ps);
 }
 
 void MainWindow::HandleCreate(WPARAM w_param, LPARAM l_param) {
+
     send_button_ = FrameBuilder<Button>()
         .Style(WS_VISIBLE | WS_CHILD)
         .Parent(hwnd_)
+        .Position(50,50)
         .Size(50,50)
         .Menu(reinterpret_cast<HMENU>(kSend))
         .Build();
 
-    message_box_ = FrameBuilder<Input>()
+    message_box_ = FrameBuilder<Edit>()
         .Style(WS_VISIBLE | WS_CHILD | ES_MULTILINE | WS_VSCROLL)
         .Size(80, 50)
         .Position(50,0)
@@ -66,7 +103,7 @@ void MainWindow::HandleCreate(WPARAM w_param, LPARAM l_param) {
     chat_view_ = FrameBuilder<ChatView>()
         .Style(WS_VISIBLE | WS_CHILD | WS_BORDER | WS_VSCROLL)
         .Size(600, 500)
-        .Position((ClientWidth() / 2) - 300 , 10)
+        .Position(300 , 10)
         .Parent(hwnd_)
         .Build();
 }
