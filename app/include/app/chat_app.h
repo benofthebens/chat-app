@@ -1,9 +1,16 @@
 #ifndef CHAT_APP_H
 #define CHAT_APP_H
 
-#include <Windows.h>
+#include "engine/application.h"
 
-inline LONG Width(const RECT& rect) { return rect.right - rect.left; }
-inline LONG Height(const RECT& rect) { return rect.bottom - rect.top; }
+class ChatAppLayer : public Engine::Layer {
+public:
+    ChatAppLayer() = default;
+    ~ChatAppLayer() override = default;
+protected:
+    void OnEvent(Engine::Event& event) override;
+    void OnUpdate() override;
+    void OnRender() override;
+};
 
 #endif
