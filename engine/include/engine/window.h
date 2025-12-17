@@ -8,6 +8,7 @@
 #include "window_props.h"
 #include "events/event.h"
 #include "events/window_events.h"
+#include "renderer/graphics_context.h"
 
 namespace Engine {
     using EventCallback = std::function<void(Event&)>;
@@ -30,7 +31,7 @@ namespace Engine {
         explicit Window(const WindowProps& props) { OnInit(props); }
         ~Window() = default;
 
-        static std::unique_ptr<Window> Create(const WindowProps& props);
+        static std::shared_ptr<Window> Create(const WindowProps& props);
         static void PollEvents();
 
         void RaiseEvent(Event& event);

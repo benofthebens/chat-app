@@ -2,6 +2,7 @@
 #define ENGINE_WINDOW_EVENT_H
 
 #include "event.h"
+#include "engine/renderer/graphics_context.h"
 
 namespace Engine {
 	class WindowClosedEvent : public Event {
@@ -11,8 +12,13 @@ namespace Engine {
 		EVENT_CLASS_TYPE(kWindowClose)
 	};
 	class WindowPaintEvent : public Event {
+	private:
+		GraphicsContext ctx_;
 	public:
-		WindowPaintEvent() = default;
+		WindowPaintEvent(const GraphicsContext& ctx)
+		    : ctx_(ctx) {}
+		GraphicsContext& GetContext() { return ctx_; }
+
 		EVENT_CLASS_TYPE(kWindowPaint)
 	};
 

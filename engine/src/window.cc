@@ -2,8 +2,8 @@
 
 using namespace Engine;
 
-std::unique_ptr<Window> Window::Create(const WindowProps& props) {
-    return std::make_unique<Window>(props);
+std::shared_ptr<Window> Window::Create(const WindowProps& props) {
+    return std::make_shared<Window>(props);
 }
 
 void Window::OnInit(const WindowProps& props) {
@@ -44,7 +44,6 @@ void Window::OnInit(const WindowProps& props) {
     );
 
     ShowWindow(hwnd_, SW_SHOW);
-    UpdateWindow(hwnd_);
 }
 
 void Window::PollEvents() {
@@ -90,11 +89,19 @@ LRESULT Window::HandleMessage(UINT msg, WPARAM w_param, LPARAM l_param) {
         return 0;
     }
     case WM_PAINT: {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hwnd_, &ps);
+        RECT rect;
+        GetClientRect(hwnd_, &rect);
+        FillRect(hdc, &rect, nullptr);
+        GraphicsContext ctx(hdc);
+
         if (data_.callback) {
-            WindowPaintEvent event;
+            WindowPaintEvent event(ctx);
             data_.callback(event);
         }
-       return 0;
+        EndPaint(hwnd_, &ps);
+        return 0;
     }
     case WM_SIZE: {
         data_.width = LOWORD(l_param);

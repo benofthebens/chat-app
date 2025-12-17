@@ -24,9 +24,6 @@ void Application::Run() {
             layer->OnUpdate();
         }
 
-        for (const auto& layer : layer_stack_) {
-            layer->OnRender();
-        }
     }
 
     OnShutdown();
@@ -38,6 +35,20 @@ Application& Application::Get() {
 }
 
 void Application::OnEvent(Event& event) {
+    EventDispatcher dispatcher(event);
+
+    dispatcher.Dispatch<WindowClosedEvent>([this](WindowClosedEvent& e) {
+        running_ = false;
+        return true;  // Handled
+    });
+
+    dispatcher.Dispatch<WindowPaintEvent>([this](WindowPaintEvent& e) {
+        for (const auto& layer : layer_stack_) {
+            layer->OnRender(e.GetContext());     // Layers receive context
+        }
+        return true;
+    });
+
     for (auto it = layer_stack_.rbegin(); it != layer_stack_.rend(); ++it) {
         (*it)->OnEvent(event);
         if (event.IsHandled()) {

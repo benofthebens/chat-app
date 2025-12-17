@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "engine/events/event.h"
+#include "engine/renderer/graphics_context.h"
 
 namespace Engine {
 	class Layer {
@@ -13,7 +14,7 @@ namespace Engine {
 		virtual void OnEvent(Event& event) {}
 
 		virtual void OnUpdate() {}
-		virtual void OnRender() {}
+		virtual void OnRender(GraphicsContext& ctx) {}
 
 		template<typename T, typename... Args>
 		void TransitionTo(Args&&... args) {
