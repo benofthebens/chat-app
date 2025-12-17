@@ -10,7 +10,7 @@ public:
 protected:
     void OnEvent(Engine::Event& event) override;
     void OnUpdate() override;
-    void OnRender() override;
+    void OnRender(Engine::GraphicsContext& ctx) override;
 };
 
 #endif
