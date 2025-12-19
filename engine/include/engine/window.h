@@ -11,37 +11,33 @@
 #include "renderer/graphics_context.h"
 
 namespace Engine {
+    class Panel;
     using EventCallback = std::function<void(Event&)>;
+
+    static constexpr auto kEngineWindow = "ENGINE_WINDOW";
 
     class Window {
     private:
         HWND hwnd_ = nullptr;
         HINSTANCE hinstance_ = nullptr;
-
-        struct WindowData {
-            std::string title;
-            uint32_t width = 0;
-            uint32_t height = 0;
-            EventCallback callback = nullptr;
-        };
-
-        WindowData data_;
-        static constexpr auto kClassName = "EngineWindow";
+        uint32_t width_;
+        uint32_t height_;
+        const char* label_;
+        EventCallback callback_ = nullptr;
     public:
         explicit Window(const WindowProps& props) { OnInit(props); }
         ~Window() = default;
 
         static std::shared_ptr<Window> Create(const WindowProps& props);
         static void PollEvents();
+        void RaiseEvent(Event& event) const;
 
-        void RaiseEvent(Event& event);
-        void SetEventCallback(const EventCallback& callback) { data_.callback = callback; }
+        void SetEventCallback(const EventCallback& callback) { callback_ = callback; }
 
-        HWND GetHwnd() { return hwnd_; }
-        uint32_t GetWidth() const { return data_.width; }
-        uint32_t GetHeight() const { return data_.height; }
-        const std::string& GetTitle() const { return data_.title; }
-
+        HWND GetHwnd() const { return hwnd_; }
+        uint32_t GetWidth() const { return width_; }
+        uint32_t GetHeight() const { return height_; }
+        const std::string& GetLabel() const { return label_; }
     private:
         void OnInit(const WindowProps& props);
         static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_param);

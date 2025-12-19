@@ -25,6 +25,7 @@ namespace Engine {
 		GraphicsContext(HDC hdc) 
 			: hdc_(hdc) {}
 		~GraphicsContext() = default;
+		void FillClientRect(HWND hwnd, Colour& colour);
 		void DrawSolidLine(Point& p, Point& p2, Colour& colour, int width);
 		void DrawTxt(const std::string& text, Point& p);
 		void DrawRct(Rect& rect);

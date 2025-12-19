@@ -16,10 +16,17 @@ namespace Engine {
 	public:
 		explicit Application(const WindowProps& props);
 		virtual ~Application() = default;
+
+		std::shared_ptr<Window> GetWindow() { return window_; }
+		static Application& Get();
 		void Run();
 
 		template <typename TLayer>
-		void PushLayer() { layer_stack_.push_back(std::make_unique<TLayer>()); }
+		void PushLayer() {
+			auto layer = std::make_unique<TLayer>();
+			layer->OnAttach(*window_);
+		    layer_stack_.push_back(std::move(layer));
+		}
 
 		template<typename TLayer>
 		TLayer* GetLayer() {
@@ -31,8 +38,6 @@ namespace Engine {
 			return nullptr;
 		}
 
-		std::shared_ptr<Window> GetWindow() { return window_; }
-		static Application& Get();
 	protected:
 		virtual void OnEvent(Event& event);
 		virtual void OnInit() { running_ = true; }

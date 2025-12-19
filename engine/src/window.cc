@@ -1,5 +1,7 @@
 #include "engine/window.h"
 
+#include "engine/widgets/button.h"
+
 using namespace Engine;
 
 std::shared_ptr<Window> Window::Create(const WindowProps& props) {
@@ -7,9 +9,9 @@ std::shared_ptr<Window> Window::Create(const WindowProps& props) {
 }
 
 void Window::OnInit(const WindowProps& props) {
-    data_.title = props.title;
-    data_.width = props.width;
-    data_.height = props.height;
+    label_ = props.label.c_str();
+    width_ = props.width;
+    height_ = props.height;
 
     hinstance_ = GetModuleHandle(nullptr);
 
@@ -20,21 +22,21 @@ void Window::OnInit(const WindowProps& props) {
     wc.hInstance = hinstance_;
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wc.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
-    wc.lpszClassName = kClassName;
+    wc.lpszClassName = kEngineWindow;
 
     if (!RegisterClassEx(&wc)) {
         return;
     }
 
-    RECT rect = { 0, 0, static_cast<LONG>(data_.width), static_cast<LONG>(data_.height) };
+    RECT rect = { 0, 0, static_cast<LONG>(width_), static_cast<LONG>(height_) };
     AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
 
     hwnd_ = CreateWindowEx(
-        0,
-        kClassName,
-        data_.title.c_str(),
-        WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, CW_USEDEFAULT,
+        props.ex_style,
+        kEngineWindow,
+        label_,
+        props.style,
+        props.x, props.y,
         rect.right - rect.left,
         rect.bottom - rect.top,
         nullptr,
@@ -54,9 +56,9 @@ void Window::PollEvents() {
     }
 }
 
-void Window::RaiseEvent(Event& event) {
-    if (data_.callback) {
-        data_.callback(event);
+void Window::RaiseEvent(Event& event) const {
+    if (callback_) {
+        callback_(event);
     }
 }
 
@@ -82,10 +84,8 @@ LRESULT CALLBACK Window::WndProc(HWND hwnd, UINT msg, WPARAM w_param, LPARAM l_p
 LRESULT Window::HandleMessage(UINT msg, WPARAM w_param, LPARAM l_param) {
     switch (msg) {
     case WM_DESTROY: {
-        if (data_.callback) {
-            WindowClosedEvent event;
-            data_.callback(event);
-        }
+        WindowClosedEvent event;
+        RaiseEvent(event);
         return 0;
     }
     case WM_PAINT: {
@@ -94,24 +94,21 @@ LRESULT Window::HandleMessage(UINT msg, WPARAM w_param, LPARAM l_param) {
         RECT rect;
         GetClientRect(hwnd_, &rect);
         FillRect(hdc, &rect, nullptr);
-        GraphicsContext ctx(hdc);
 
-        if (data_.callback) {
-            WindowPaintEvent event(ctx);
-            data_.callback(event);
-        }
+        GraphicsContext ctx(hdc);
+        WindowPaintEvent event(ctx);
+        RaiseEvent(event);
+
         EndPaint(hwnd_, &ps);
         return 0;
     }
     case WM_SIZE: {
-        data_.width = LOWORD(l_param);
-        data_.height = HIWORD(l_param);
+        width_ = LOWORD(l_param);
+        height_ = HIWORD(l_param);
 
-        if (data_.callback) {
-            WindowResizeEvent event(data_.width, data_.height);
-            data_.callback(event);
-        }
+        WindowResizeEvent event(width_, height_);
 
+        RaiseEvent(event);
         return 0;
     }
     case WM_KEYDOWN:

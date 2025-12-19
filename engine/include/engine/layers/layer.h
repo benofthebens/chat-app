@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include "engine/window.h"
 #include "engine/events/event.h"
 #include "engine/renderer/graphics_context.h"
 
@@ -10,11 +11,9 @@ namespace Engine {
 	class Layer {
 	public:
 		virtual ~Layer() = default;
-
 		virtual void OnEvent(Event& event) {}
-
-		virtual void OnUpdate() {}
 		virtual void OnRender(GraphicsContext& ctx) {}
+		virtual void OnAttach(Window& window) {}
 
 		template<typename T, typename... Args>
 		void TransitionTo(Args&&... args) {

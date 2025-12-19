@@ -19,11 +19,6 @@ void Application::Run() {
 
     while (running_) {
         Window::PollEvents();
-
-        for (const auto& layer : layer_stack_) {
-            layer->OnUpdate();
-        }
-
     }
 
     OnShutdown();

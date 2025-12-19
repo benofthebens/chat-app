@@ -6,12 +6,24 @@
 namespace Engine {
 
 struct WindowProps {
-	std::string title;
-	uint32_t width;
-	uint32_t height;
+	std::string label;
+	uint32_t width = 1200;
+	uint32_t height = 600;
+	int32_t x = CW_USEDEFAULT;
+	int32_t y = CW_USEDEFAULT;
+	DWORD style = WS_OVERLAPPEDWINDOW;
+	DWORD ex_style = 0;
+};
 
-	WindowProps(const std::string& title = "", uint32_t width = 1200, uint32_t height = 600)
-		: title(title), width(width), height(height) {
+struct PanelProps : WindowProps {
+	HWND parent = nullptr;
+	std::string class_name;
+	PanelProps() {
+		style = WS_VISIBLE | WS_CHILD;
+		x = 0;
+		y = 0;
+		width = 0;
+		height = 0;
 	}
 };
 

@@ -1,5 +1,14 @@
 #include "engine/renderer/graphics_context.h"
 
+void Engine::GraphicsContext::FillClientRect(HWND hwnd, Colour& colour) {
+	RECT client;
+	HBRUSH brush = CreateSolidBrush(colour.ToColourRef());
+	GetClientRect(hwnd, &client);
+	FillRect(hdc_, &client, brush);
+
+	DeleteObject(brush);
+}
+
 void Engine::GraphicsContext::DrawSolidLine(Point& p, Point& p2,Colour& colour, int width) {
 
 	HPEN pen = CreatePen(PS_SOLID, width, colour.ToColourRef());
