@@ -28,7 +28,7 @@ public:
     int Receive(void* buffer, int size) override;
     int Bind(const Socket& socket);
     int Listen(int backlog = 1);
-    std::unique_ptr<NetworkSocket> Accept();
+    std::unique_ptr<NetworkSocket> Accept() const;
     bool IsListening() const { return listening_; }
     SOCKET Handle() override { return socket_.GetHandle(); }
 };

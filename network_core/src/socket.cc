@@ -42,7 +42,10 @@ int NetworkSocket::Connect(const Socket& socket) {
 
 std::unique_ptr<NetworkSocket> NetworkSocket::Accept() const {
     const SOCKET client_handle = accept(handle_, nullptr, nullptr);
-    if (client_handle == SOCKET_ERROR) {
+
+    if (client_handle == INVALID_SOCKET) {
+        int err = WSAGetLastError();
+        OutputDebugStringA(("Accept failed: " + std::to_string(err) + "\n").c_str());
         return std::make_unique<NetworkSocket>(INVALID_SOCKET);
     }
     return std::make_unique<NetworkSocket>(client_handle);

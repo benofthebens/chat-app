@@ -31,7 +31,8 @@ int ServerConnection::Listen(const int backlog) {
     listening_ = true;
     return result;
 }
-std::unique_ptr<NetworkSocket> ServerConnection::Accept() {
+
+std::unique_ptr<NetworkSocket> ServerConnection::Accept() const {
     if (!listening_) {
         return std::make_unique<NetworkSocket>(INVALID_SOCKET);
     }

@@ -11,7 +11,9 @@ namespace Engine {
 		kWindowResize,
 		kKeyPressed,
 		kKeyReleased,
-		kWindowPaint
+		kWindowPaint,
+		kMessageSend,
+		kMessageReceive
 	};
 
 	class Event {

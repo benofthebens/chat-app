@@ -20,6 +20,7 @@ namespace Engine {
 		std::shared_ptr<Window> GetWindow() { return window_; }
 		static Application& Get();
 		void Run();
+		void RaiseEvent(Event& event) { OnEvent(event); }
 
 		template <typename TLayer>
 		void PushLayer() {

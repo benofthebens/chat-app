@@ -14,6 +14,7 @@ namespace Engine {
 		virtual void OnEvent(Event& event) {}
 		virtual void OnRender(GraphicsContext& ctx) {}
 		virtual void OnAttach(Window& window) {}
+		virtual void OnUpdate() {}
 
 		template<typename T, typename... Args>
 		void TransitionTo(Args&&... args) {

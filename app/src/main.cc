@@ -1,10 +1,10 @@
 #pragma comment(lib, "Ws2_32.lib")
-
+#include "network_core/application_server.h"
 #include <Windows.h>
 #include "engine/window_props.h"
-
 #include "app/chat_app.h"
-
+#include "app/network_events.h"
+#include "app/network_layer.h"
 
 int WINAPI WinMain(HINSTANCE h_instance, HINSTANCE h_prev_instance, LPSTR lp_cmd_line, int n_cmd_show) {
 
@@ -12,9 +12,10 @@ int WINAPI WinMain(HINSTANCE h_instance, HINSTANCE h_prev_instance, LPSTR lp_cmd
     WSADATA wsa_data;
     if (WSAStartup(version_requested, &wsa_data) != 0) { return -1; }
 
-    Engine::WindowProps props = { "Chat App", 600, 600 };
+    WindowProps props = { "Chat App", 600, 600 };
 
-    Engine::Application application(props);
+    Application application(props);
+    application.PushLayer<NetworkLayer>();
     application.PushLayer<ChatAppLayer>();
     application.Run();
 
