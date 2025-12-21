@@ -12,7 +12,7 @@ int WINAPI WinMain(HINSTANCE h_instance, HINSTANCE h_prev_instance, LPSTR lp_cmd
     WSADATA wsa_data;
     if (WSAStartup(version_requested, &wsa_data) != 0) { return -1; }
 
-    WindowProps props = { "Chat App", 600, 600 };
+    WindowProps props = { "Chat App", 1200, 600 };
 
     Application application(props);
     application.PushLayer<NetworkLayer>();

@@ -27,7 +27,7 @@ namespace Engine {
 		~GraphicsContext() = default;
 		void FillClientRect(HWND hwnd, Colour& colour);
 		void DrawSolidLine(Point& p, Point& p2, Colour& colour, int width);
-		void DrawTxt(const std::string& text, Point& p);
+		void OutText(const std::string& text, const Point& p);
 		void DrawRct(Rect& rect);
 	};
 }

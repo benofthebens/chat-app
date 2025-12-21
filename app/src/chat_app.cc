@@ -5,49 +5,61 @@
 #include "engine/widgets/button.h"
 #include "engine/props_builder.h"
 
-void ChatAppLayer::OnEvent(Engine::Event& event) {
-    Engine::EventDispatcher dispatcher(event);
+ChatAppLayer::~ChatAppLayer() {
+    delete panel_;
+    delete chat_view_;
+    delete input_;
+    delete button_;
+}
+
+void ChatAppLayer::OnEvent(Event& event) {
+    EventDispatcher dispatcher(event);
 
     dispatcher.Dispatch<MessageReceiveEvent>([this](MessageReceiveEvent& e) {
-        HWND hwnd = Application::Get().GetWindow()->GetHwnd();
-        MessageBox(hwnd, e.GetMsg().data, "Message", MB_OK);
-        return false;  
+        chat_view_->AddMessage(e.GetMsg().data);
+        return true;  
     });
 }
 
-void ChatAppLayer::OnRender(Engine::GraphicsContext& ctx) {}
+void ChatAppLayer::OnRender(GraphicsContext& ctx) {}
 
-void ChatAppLayer::OnAttach(Engine::Window& window) {
-    Engine::PanelProps props = Engine::PropsBuilder<Engine::PanelProps>()
+void ChatAppLayer::OnAttach(Window& window) {
+
+    PanelProps main_panel_props = PropsBuilder<PanelProps>()
         .Parent(window.GetHwnd())
         .Position(0,0)
         .Size(window.GetWidth(), window.GetHeight())
-        .Style(WS_BORDER)
         .Build();
-    props.class_name = "MAIN_PANEL";
+    main_panel_props.class_name = "MAIN_PANEL";
+    panel_ = new Panel(main_panel_props);
 
-    panel_ = new Engine::Panel(props);
-    Engine::TextInputProps tiprops= Engine::PropsBuilder<TextInputProps>()
-        .Parent(window.GetHwnd())
+    PanelProps chat_view_props = PropsBuilder<PanelProps>()
+        .Position(300, 10)
+        .Size(600, 500)
+        .Style(WS_BORDER | WS_VSCROLL)
+        .Build();
+    chat_view_props.class_name = "CHAT_VIEW";
+
+    TextInputProps input_props = PropsBuilder<TextInputProps>()
+        .Position(50, 0)
+        .Size(80, 50)
+        .Style(WS_BORDER | ES_MULTILINE | WS_VSCROLL)
+        .Build();
+
+    ButtonProps button_props = PropsBuilder<ButtonProps>()
         .Position(50, 50)
-        .Size(100, 50)
-        .Style(WS_BORDER)
-        .Build();
-
-    auto input = panel_->AddChild<TextInput>(tiprops);
-
-    Engine::ButtonProps bps = Engine::PropsBuilder<Engine::ButtonProps>()
-        .Position(0, 0)
         .Size(50, 50)
-        .Label("Hello")
+        .Label("Send")
         .Build();
-
-    bps.on_click = [input]() {
+    button_props.on_click = [this]{
         Message msg{};
-        strcpy_s(msg.data, input->GetText().c_str());
+        strcpy_s(msg.data, input_->GetText().c_str());
 
         MessageSendEvent event(msg);
         Application::Get().RaiseEvent(event);
     };
-    panel_->AddChild<Engine::Button>(bps);
+
+    chat_view_ = panel_->AddChild<ChatPanel>(chat_view_props);
+    input_ = panel_->AddChild<TextInput>(input_props);
+    button_ = panel_->AddChild<Button>(button_props);
 }

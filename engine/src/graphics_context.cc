@@ -20,3 +20,7 @@ void Engine::GraphicsContext::DrawSolidLine(Point& p, Point& p2,Colour& colour, 
 	SelectObject(hdc_, old_pen);
 	DeleteObject(pen);
 }
+
+void Engine::GraphicsContext::OutText(const std::string& text, const Point& p) {
+	TextOut(hdc_, p.x, p.y, text.data(), static_cast<int>(text.length()));
+}
