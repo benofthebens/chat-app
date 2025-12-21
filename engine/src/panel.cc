@@ -96,6 +96,30 @@ LRESULT Panel::HandleMessage(UINT msg, WPARAM w_param, LPARAM l_param) {
         }
         return 0;
     }
+    case WM_VSCROLL: {
+        const INT scroll_type = LOWORD(w_param);
+
+        SCROLLINFO si;
+        si.cbSize = sizeof(SCROLLINFO);
+        si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS | SIF_TRACKPOS;
+        GetScrollInfo(hwnd_, SB_VERT, &si);
+
+        int position = 0;
+        switch (scroll_type) {
+        case SB_TOP:        position = si.nMin;         break;
+        case SB_BOTTOM:     position = si.nMax;         break;
+        case SB_LINEUP:     position = --si.nPos;       break;
+        case SB_LINEDOWN:   position = ++si.nPos;       break;
+        case SB_THUMBTRACK: position = si.nTrackPos;    break;
+        default:
+        case SB_THUMBPOSITION:position = si.nPos;       break;
+        }
+        scroll_pos_ = si.nPos;
+
+        SetScrollPos(hwnd_, SB_VERT, position, TRUE);
+        InvalidateRect(hwnd_, nullptr, TRUE);
+        return 0;
+    }
     default: break;
     }
     return DefWindowProc(hwnd_, msg, w_param, l_param);

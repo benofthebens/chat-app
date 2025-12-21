@@ -41,13 +41,13 @@ void ChatAppLayer::OnAttach(Window& window) {
     chat_view_props.class_name = "CHAT_VIEW";
 
     TextInputProps input_props = PropsBuilder<TextInputProps>()
-        .Position(50, 0)
-        .Size(80, 50)
+        .Position(chat_view_props.x, chat_view_props.y + 500)
+        .Size(chat_view_props.width - 50, 50)
         .Style(WS_BORDER | ES_MULTILINE | WS_VSCROLL)
         .Build();
 
     ButtonProps button_props = PropsBuilder<ButtonProps>()
-        .Position(50, 50)
+        .Position(input_props.x + input_props.width, input_props.y)
         .Size(50, 50)
         .Label("Send")
         .Build();

@@ -21,6 +21,31 @@ void Engine::GraphicsContext::DrawSolidLine(Point& p, Point& p2,Colour& colour, 
 	DeleteObject(pen);
 }
 
-void Engine::GraphicsContext::OutText(const std::string& text, const Point& p) {
+void Engine::GraphicsContext::Text(const std::string& text, const Point& p) {
 	TextOut(hdc_, p.x, p.y, text.data(), static_cast<int>(text.length()));
+}
+
+void Engine::GraphicsContext::Text(const std::string& text, LPRECT rect, UINT format) {
+	SetBkMode(hdc_, TRANSPARENT);
+	DrawText(hdc_, text.data(), -1, rect, format);
+}
+
+void Engine::GraphicsContext::DrawRoundRect(LPRECT rect, int radius, const Colour& fill) {
+	HBRUSH brush = CreateSolidBrush(fill.ToColourRef());
+	HBRUSH old_brush = (HBRUSH)SelectObject(hdc_, brush);
+	HPEN pen = CreatePen(PS_SOLID, 1, fill.ToColourRef());
+	HPEN old_pen = (HPEN)SelectObject(hdc_, pen);
+
+	::RoundRect(hdc_, rect->left, rect->top, rect->right, rect->bottom, radius, radius);
+
+	SelectObject(hdc_, old_brush);
+	SelectObject(hdc_, old_pen);
+	DeleteObject(brush);
+	DeleteObject(pen);
+}
+
+void Engine::GraphicsContext::DrawRect(LPRECT rect, const Colour& fill) {
+	HBRUSH brush = CreateSolidBrush(fill.ToColourRef());
+	::FillRect(hdc_, rect, brush);
+	DeleteObject(brush);
 }

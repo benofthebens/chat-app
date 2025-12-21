@@ -21,6 +21,7 @@ namespace Engine {
         int32_t x_;
         int32_t y_;
         static uint32_t cid_;
+        int scroll_pos_ = 0;
     public:
         Panel(const PanelProps& props) { OnInit(props); }
         virtual ~Panel() = default;
@@ -30,6 +31,7 @@ namespace Engine {
         uint32_t GetWidth() const { return width_; }
         uint32_t GetHeight() const { return height_; }
         uint32_t GetId() const { return id_; }
+        int GetScrollPos() const { return scroll_pos_; }
 
         void Show() const { ShowWindow(hwnd_, SW_SHOW); }
         void Hide() const { ShowWindow(hwnd_, SW_HIDE); }
