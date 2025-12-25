@@ -1,4 +1,4 @@
-#include "network_core/socket.h"
+#include "network/socket.h"
 
 NetworkSocket::NetworkSocket() {
     handle_ = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);

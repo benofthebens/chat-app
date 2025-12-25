@@ -8,6 +8,6 @@ enable_testing()
 add_subdirectory("lib/googletest")
 
 add_subdirectory("app")
-add_subdirectory("network_core")
+add_subdirectory("network")
 add_subdirectory("engine")
 enable_testing()

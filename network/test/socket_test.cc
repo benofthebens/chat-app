@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "network_core/socket.h"
+#include "network/socket.h"
 
 class TcpSocketTest : public ::testing::Test {
 protected:
@@ -12,6 +12,7 @@ protected:
         tcp_socket_ = std::make_unique<NetworkSocket>();
     }
     void TearDown() override {
+        tcp_socket_->Close();
         WSACleanup();
     }
 };

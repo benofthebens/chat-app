@@ -1,8 +1,8 @@
-#include "network_core/session.h"
+#include "network/session.h"
 
 #include <gtest/gtest.h>
 
-#include "network_core/connection.h"
+#include "network/connection.h"
 
 struct TestProtocol {
     int id;

@@ -6,7 +6,7 @@
 
 #include "network_events.h"
 #include "engine/layers/layer.h"
-#include "network_core/application_client.h"
+#include "network/application_client.h"
 
 
 class NetworkLayer : public Engine::Layer {

@@ -1,4 +1,4 @@
-#include "network_core/connection.h"
+#include "network/connection.h"
 
 #include <gtest/gtest.h>
 
@@ -17,6 +17,8 @@ protected:
     }
 
     void TearDown() override {
+        client_->Close();
+        server_->Close();
         WSACleanup();
     }
 };

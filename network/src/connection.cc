@@ -1,4 +1,4 @@
-#include "network_core/connection.h"
+#include "network/connection.h"
 
 int ServerConnection::Send(const void* data, const int size) {
     return socket_.Send(data, size);
