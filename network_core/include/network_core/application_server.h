@@ -3,6 +3,8 @@
 
 #include <functional>
 #include <map>
+#include <mutex>
+#include <atomic>
 #include <thread>
 
 #include "session.h"
@@ -13,6 +15,7 @@ private:
 	ServerConnection conn_;
 	ProtocolHandler<TProtocol> ph_;
 	std::map<SOCKET, std::shared_ptr<ClientConnection>> clients_ = {};
+	std::atomic<bool> running_ = false;
 public:
 	std::function<void(Session<TProtocol>&)> on_connect_;
 	std::function<void(Session<TProtocol>&, const TProtocol&)> on_message_;
@@ -20,18 +23,30 @@ public:
 	void Run(const Socket& socket) {
 		conn_.Bind(socket);
 		conn_.Listen();
-		while (conn_.IsListening()) {
+		running_ = conn_.IsListening();
+		while (running_) {
 			auto conn = conn_.Accept();
 			if (conn == nullptr) { continue; }
 			auto client = std::make_shared<ClientConnection>(std::move(conn), true);
+			auto session = std::make_shared<Session<TProtocol>>(client); 
+
 			clients_.insert({ client->Handle(), client });
 
-			Session<TProtocol> session(client);
+			if (on_connect_) { on_connect_(*session); }
 
-			if (on_connect_) { on_connect_(session); }
-
-			std::thread client_thread(&Session<TProtocol>::Run, &session, on_message_);
+			std::thread client_thread([session, this]() {  
+				session->Run(on_message_);
+			});
 			client_thread.detach();
+		}
+	}
+
+	void Stop() {
+		running_ = false;
+		conn_.Close();
+		for (auto& [socket, client] :clients_) {
+			closesocket(socket);
+			client->Close();
 		}
 	}
 
@@ -46,7 +61,6 @@ public:
 		std::vector<uint8_t> raw_data = ph_.Serialise(data);
 		conn_.Send(raw_data.data(), raw_data.size());
 	}
-
 };
 
 #endif

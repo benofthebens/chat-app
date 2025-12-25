@@ -8,6 +8,11 @@ int ServerConnection::Receive(void* buffer, const int size) {
     return socket_.Receive(buffer, size);
 }
 
+void ServerConnection::Close() {
+    socket_.Close();
+    listening_ = false;
+}
+
 int ServerConnection::Bind(const Socket& socket) {
     return socket_.Bind(socket);
 }
@@ -28,6 +33,11 @@ int ClientConnection::Send(const void* data, const int size) {
 
 int ClientConnection::Receive(void* buffer, const int size) {
     return socket_->Receive(buffer, size);
+}
+
+void ClientConnection::Close() {
+    socket_->Close();
+    connected_ = false;
 }
 
 int ClientConnection::Connect(const Socket& socket) {

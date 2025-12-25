@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <functional>
+#include <iostream>
 
 #include "connection.h"
 #include "protocol_handler.h"
@@ -12,20 +13,30 @@ class Session {
 private:
 	std::shared_ptr<ClientConnection> conn_ = nullptr;
 	ProtocolHandler<TProtocol> ph_;
+	std::atomic<bool> running_ = false;
 public:
 	explicit Session(const std::shared_ptr<ClientConnection>& conn)
         : conn_(conn) {}
 	~Session() = default;
 	void Run(std::function<void(Session&, const TProtocol&)> on_message) {
-		while (conn_->IsConnected()) {
+		running_ = conn_->IsConnected();
+		while (running_) {
 			std::vector<uint8_t> buffer(sizeof(TProtocol));
-			int bytes_read = conn_->Receive(buffer.data(), buffer.size());
+			const int n = static_cast<int>(buffer.size());
+			const int bytes_read = conn_->Receive(buffer.data(), n);
 
 			if (bytes_read < 0) { break; }
 
 			TProtocol data = ph_.Deserialise(reinterpret_cast<char*>(buffer.data()));
-			on_message(*this, data);
+			if (on_message) { on_message(*this, data); }
 		}
+	}
+
+	void Stop() {
+		if (conn_) {
+			conn_->Close();
+		}
+		running_ = false;
 	}
  
 	void Send(const TProtocol& data) {

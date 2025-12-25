@@ -2,6 +2,7 @@
 #define APPLICATION_CLIENT_H
 
 #include <functional>
+#include <mutex>
 
 #include "connection.h"
 #include "protocol_handler.h"
@@ -20,15 +21,22 @@ public:
 		if (on_connect_) on_connect_();
 		while (conn_.IsConnected()) {
 			std::vector<uint8_t> buffer(sizeof(TProtocol));
-			const int bytes_read = conn_.Receive(buffer.data(), buffer.size());
+			const int n = static_cast<int>(buffer.size());
+			const int bytes_read = conn_.Receive(buffer.data(), n);
 			if (bytes_read < 0) { break; }
 			TProtocol data = ph_.Deserialise(reinterpret_cast<char*>(buffer.data()));
 			if (on_message_) { on_message_(data); }
 		}
 	}
+
+	void Stop() {
+		conn_.Close();
+	}
+
 	void Send(const TProtocol& data) {
-		std::vector<uint8_t> raw_data = ph_.Serialise(data);
-		conn_.Send(raw_data.data(), raw_data.size());
+		const std::vector<uint8_t> raw_data = ph_.Serialise(data);
+		const int n = static_cast<int>(raw_data.size());
+		conn_.Send(raw_data.data(), n);
 	}
 };
 

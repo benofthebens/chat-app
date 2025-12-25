@@ -15,19 +15,21 @@ class NetworkSocket {
 private:
 	SOCKET handle_ = INVALID_SOCKET;
 	Socket socket_{};
-private:
-    sockaddr_in MakeSocket() const;
 public:
 	explicit NetworkSocket();
-	explicit NetworkSocket(const SOCKET handle) : handle_(handle) {}
-	~NetworkSocket() { closesocket(handle_); }
+	explicit NetworkSocket(const SOCKET handle)
+        : handle_(handle) {}
+	~NetworkSocket() { Close(); }
 	int Bind(const Socket& socket);
 	int Listen(int backlog = 1) const;
 	int Connect(const Socket& socket) ;
 	std::unique_ptr<NetworkSocket> Accept() const;
 	int Send(const void* data, int size) const;
 	int Receive(void* buffer, int size) const;
+	void Close();
 	SOCKET GetHandle() const { return handle_; }
+private:
+    sockaddr_in MakeSocket() const;
 };
 
 #endif

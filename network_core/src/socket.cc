@@ -50,5 +50,10 @@ int NetworkSocket::Receive(void* buffer, const int size) const {
     return recv(handle_, static_cast<char*>(buffer), size, 0);
 }
 
+void NetworkSocket::Close() {
+    closesocket(handle_);
+    socket_ = {};
+}
+
 
 

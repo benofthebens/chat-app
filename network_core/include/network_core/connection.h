@@ -13,6 +13,7 @@ public:
     virtual ~IConnection() = default;
     virtual int Send(const void* data, int size) = 0;
     virtual int Receive(void* buffer, int size) = 0;
+    virtual void Close() = 0;
     virtual SOCKET Handle() = 0;
 };
 
@@ -25,6 +26,7 @@ public:
     ~ServerConnection() override = default;
     int Send(const void* data, int size) override;
     int Receive(void* buffer, int size) override;
+    void Close() override;
     int Bind(const Socket& socket);
     int Listen(int backlog = 1);
     std::unique_ptr<NetworkSocket> Accept() const;
@@ -44,6 +46,7 @@ public:
     ~ClientConnection() override = default;
     int Send(const void* data, int size) override;
     int Receive(void* buffer, int size) override;
+    void Close() override;
     int Connect(const Socket& socket);
     bool IsConnected() const { return connected_; }
     SOCKET Handle() override { return socket_->GetHandle(); }
