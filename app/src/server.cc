@@ -11,6 +11,7 @@ int main() {
 
     ApplicationServer<Message> server;
     Socket socket = { "127.0.0.1", 8080 };
+    server.on_connect_ = [&server](Session<Message>& session) { server.SendAll({ "User Joined Session" }); };
     server.on_message_ = [&server](Session<Message>& session, const Message& msg) {
         server.SendAll(msg);
     };

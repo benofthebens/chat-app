@@ -17,7 +17,7 @@ void ChatAppLayer::OnEvent(Event& event) {
 
     dispatcher.Dispatch<MessageReceiveEvent>([this](MessageReceiveEvent& e) {
         chat_view_->AddMessage(e.GetMsg().data);
-        return true;  
+        return false;  
     });
 }
 
@@ -54,7 +54,6 @@ void ChatAppLayer::OnAttach(Window& window) {
     button_props.on_click = [this]{
         Message msg{};
         strcpy_s(msg.data, input_->GetText().c_str());
-
         MessageSendEvent event(msg);
         Application::Get().RaiseEvent(event);
     };

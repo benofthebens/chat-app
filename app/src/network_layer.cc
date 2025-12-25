@@ -18,9 +18,6 @@ void NetworkLayer::OnAttach(Engine::Window& window) {
         std::lock_guard lock(mutex_);
         pending_messages_.push(msg);
     };
-    client_.on_connect_ = []() {
-        OutputDebugString("Client Connected");
-    };
     Socket socket = { "127.0.0.1", 8080 };
     network_thread_ = std::thread(
         &ApplicationClient<Message>::Run, &client_, socket);
@@ -28,10 +25,10 @@ void NetworkLayer::OnAttach(Engine::Window& window) {
 }
 
 void NetworkLayer::OnUpdate() {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lock(mutex_);
     while (!pending_messages_.empty()) {
         MessageReceiveEvent event(pending_messages_.front());
-        Engine::Application::Get().RaiseEvent(event);
+        Application::Get().RaiseEvent(event);
         pending_messages_.pop();
     }
 }
