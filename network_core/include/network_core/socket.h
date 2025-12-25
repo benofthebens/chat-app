@@ -25,8 +25,8 @@ public:
 	int Listen(int backlog = 1) const;
 	int Connect(const Socket& socket) ;
 	std::unique_ptr<NetworkSocket> Accept() const;
-	int Send(const void* data, int size);
-	int Receive(void* buffer, int size);
+	int Send(const void* data, int size) const;
+	int Receive(void* buffer, int size) const;
 	SOCKET GetHandle() const { return handle_; }
 };
 

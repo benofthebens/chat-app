@@ -21,11 +21,12 @@ public:
 		conn_.Bind(socket);
 		conn_.Listen();
 		while (conn_.IsListening()) {
-			auto client = std::make_shared<ClientConnection>(conn_.Accept(), true);
+			auto conn = conn_.Accept();
+			if (conn == nullptr) { continue; }
+			auto client = std::make_shared<ClientConnection>(std::move(conn), true);
+			clients_.insert({ client->Handle(), client });
 
 			Session<TProtocol> session(client);
-
-			clients_.insert({ client->Handle(), client });
 
 			if (on_connect_) { on_connect_(session); }
 
@@ -35,7 +36,7 @@ public:
 	}
 
 	void SendAll(const TProtocol& data) {
-		std::vector<uint8_t> raw = ph_.Serialise(data);
+		const std::vector<uint8_t> raw = ph_.Serialise(data);
 	    for (auto& [handle, client] : clients_) {
 			client->Send(raw.data(), raw.size());
 	    }

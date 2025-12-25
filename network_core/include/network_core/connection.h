@@ -19,7 +19,6 @@ public:
 class ServerConnection : public IConnection {
 private:
     NetworkSocket socket_;
-	bool bounded_ = false;
     bool listening_ = false;
 public:
     ServerConnection() = default;
