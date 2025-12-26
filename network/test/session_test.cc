@@ -31,18 +31,26 @@ TEST(SessionTest, Session_SendAndReceive) {
     attach_thread.join();
     ASSERT_NE(conn, nullptr);
 
+    auto protocol = std::make_shared<PodProtocol<TestProtocol>>();
+
     std::string output;
 
-    Session<TestProtocol> session(conn);
-    std::thread session_thread([&session, &output]() {
-        session.Run([&output](Session<TestProtocol>& session, const TestProtocol& test) {
-            output = test.message;
+    Session session(conn, protocol);
+    std::thread session_thread([&output, &protocol, &session]() {
+        session.Run([&output, &protocol](Session& session, const std::vector<uint8_t>& test) {
+            TestProtocol tp;
+            protocol->Deserialise(test, &tp);
+            output = tp.message;
             session.Stop();
         });
     });
 
     TestProtocol message = { 1, "hello world" };
-    client->Send(&message, sizeof(TestProtocol));
+    auto raw = protocol->Serialise(&message);
+    TestProtocol buffer;
+    protocol->Deserialise(raw, &buffer);
+
+    client->Send(raw.data(), sizeof(TestProtocol));
 
     session_thread.join();
     EXPECT_EQ(message.message, output);

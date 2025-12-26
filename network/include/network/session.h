@@ -6,29 +6,27 @@
 #include <iostream>
 
 #include "connection.h"
-#include "protocol_handler.h"
+#include "protocol.h"
 
-template <typename TProtocol>
 class Session {
 private:
 	std::shared_ptr<ClientConnection> conn_ = nullptr;
-	ProtocolHandler<TProtocol> ph_;
+	std::shared_ptr<IProtocol> protocol_ = nullptr;
 	std::atomic<bool> running_ = false;
 public:
-	explicit Session(const std::shared_ptr<ClientConnection>& conn)
-        : conn_(conn) {}
+	explicit Session(const std::shared_ptr<ClientConnection>& conn, const std::shared_ptr<IProtocol>& protocol)
+        : conn_(conn), protocol_(protocol) {}
 	~Session() = default;
-	void Run(std::function<void(Session&, const TProtocol&)> on_message) {
+	void Run(std::function<void(Session&, const std::vector<uint8_t>&)> on_message) {
 		running_ = conn_->IsConnected();
 		while (running_) {
-			std::vector<uint8_t> buffer(sizeof(TProtocol));
+			std::vector<uint8_t> buffer(protocol_->MessageSize());
 			const int n = static_cast<int>(buffer.size());
 			const int bytes_read = conn_->Receive(buffer.data(), n);
 
 			if (bytes_read < 0) { break; }
 
-			TProtocol data = ph_.Deserialise(reinterpret_cast<char*>(buffer.data()));
-			if (on_message) { on_message(*this, data); }
+			if (on_message) { on_message(*this, buffer); }
 		}
 	}
 
@@ -39,8 +37,8 @@ public:
 		running_ = false;
 	}
  
-	void Send(const TProtocol& data) {
-		auto raw_data = ph_.Serialise(data);
+	void Send(const void* data) {
+		auto raw_data = protocol_->Serialise(data);
 		conn_->Send(raw_data.data(), raw_data.size());
 	}
 };

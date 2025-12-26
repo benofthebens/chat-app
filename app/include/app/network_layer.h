@@ -11,7 +11,7 @@
 
 class NetworkLayer : public Engine::Layer {
 private:
-    ApplicationClient<Message> client_;
+    ApplicationClient client_ = ApplicationClient(std::make_shared<PodProtocol<Message>>());
     std::queue<Message> pending_messages_;
     std::thread network_thread_;
     std::mutex mutex_;

@@ -9,16 +9,18 @@
 
 #include "session.h"
 
-template <typename TProtocol>
 class ApplicationServer {
 private:
 	ServerConnection conn_;
-	ProtocolHandler<TProtocol> ph_;
+	std::shared_ptr<IProtocol> protocol_ = nullptr;
 	std::map<SOCKET, std::shared_ptr<ClientConnection>> clients_ = {};
 	std::atomic<bool> running_ = false;
 public:
-	std::function<void(Session<TProtocol>&)> on_connect_;
-	std::function<void(Session<TProtocol>&, const TProtocol&)> on_message_;
+	std::function<void(Session&)> on_connect_;
+	std::function<void(Session&, const std::vector<uint8_t>&)> on_message_;
+
+	explicit ApplicationServer(const std::shared_ptr<IProtocol>& protocol) : protocol_(protocol) {}
+	~ApplicationServer() { Stop(); }
 
 	void Run(const Socket& socket) {
 		conn_.Bind(socket);
@@ -28,7 +30,7 @@ public:
 			auto conn = conn_.Accept();
 			if (conn == nullptr) { continue; }
 			auto client = std::make_shared<ClientConnection>(std::move(conn), true);
-			auto session = std::make_shared<Session<TProtocol>>(client); 
+			auto session = std::make_shared<Session>(client, protocol_); 
 
 			clients_.insert({ client->Handle(), client });
 
@@ -50,16 +52,18 @@ public:
 		}
 	}
 
-	void SendAll(const TProtocol& data) {
-		const std::vector<uint8_t> raw = ph_.Serialise(data);
-	    for (auto& [handle, client] : clients_) {
-			client->Send(raw.data(), raw.size());
-	    }
+	void SendAll(const void* data) {
+		const std::vector<uint8_t> raw = protocol_->Serialise(data);
+		const int n = static_cast<int>(raw.size());
+		for (auto& [handle, client] : clients_) {
+			client->Send(raw.data(), n);
+		}
 	}
 
-	void Send(const TProtocol& data) {
-		std::vector<uint8_t> raw_data = ph_.Serialise(data);
-		conn_.Send(raw_data.data(), raw_data.size());
+	void Send(const void* data) {
+		std::vector<uint8_t> raw = protocol_->Serialise(data);
+		const int n = static_cast<int>(raw.size());
+		conn_.Send(raw.data(), n);
 	}
 };
 

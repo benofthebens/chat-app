@@ -1,14 +1,10 @@
 set(SRC_FILES 
     "src/connection.cc" 
     "src/socket.cc"
-     
-     
-     
-    
 )
 set(INCLUDE_FILES
     "include/network/connection.h"  
-    "include/network/protocol_handler.h"  
+    "include/network/protocol.h"  
     "include/network/session.h" 
     "include/network/application_server.h" 
     "include/network/application_client.h" 
