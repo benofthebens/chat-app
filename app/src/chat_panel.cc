@@ -62,7 +62,7 @@ void ChatPanel::OnPaint(Engine::GraphicsContext& ctx) {
             msg_rect.right = client.right - 20;
         }
 
-        Colour colour = is_user ? Colour::Blue() : Colour::Green();
+        Colour colour = is_user ? Colour(0x42adfc) : Colour(0xe7e7e9);
 
         RECT bubble_rect = msg_rect;
         InflateRect(&bubble_rect, 10, 6);
@@ -75,7 +75,7 @@ void ChatPanel::OnPaint(Engine::GraphicsContext& ctx) {
             tail.right += 10;
         }
         ctx.DrawRect(&tail, colour);
-        ctx.Text(msg.data, &msg_rect, DT_WORDBREAK | DT_EDITCONTROL, Colour::White());
+        ctx.Text(msg.data, &msg_rect, DT_WORDBREAK | DT_EDITCONTROL, is_user ? Colour::White() : Colour::Black());
 
         ctx.SetFont(label_font);
         RECT label = { bubble_rect.left, bubble_rect.bottom, bubble_rect.right, bubble_rect.bottom };

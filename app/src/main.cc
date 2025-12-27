@@ -6,8 +6,8 @@
 #include "app/user.h"
 
 int WINAPI WinMain(HINSTANCE h_instance, HINSTANCE h_prev_instance, LPSTR lp_cmd_line, int n_cmd_show) {
-
     User::Get().Initialize();
+
     WindowProps props = { "Chat App", 1200, 600 };
 
     Application application(props);
