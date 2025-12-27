@@ -8,7 +8,6 @@
 #include "engine/layers/layer.h"
 #include "network/application_client.h"
 
-
 class NetworkLayer : public Engine::Layer {
 private:
     ApplicationClient client_ = ApplicationClient(std::make_shared<PodProtocol<Message>>());

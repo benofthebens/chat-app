@@ -8,10 +8,6 @@ protected:
     std::unique_ptr<ClientConnection> client_;
 
     void SetUp() override {
-        constexpr WORD version_requested = MAKEWORD(2, 2); // gets the version requested
-        WSADATA wsa_data;
-        WSAStartup(version_requested, &wsa_data);
-
         server_ = std::make_unique<ServerConnection>();
         client_ = std::make_unique<ClientConnection>();
     }
@@ -19,7 +15,6 @@ protected:
     void TearDown() override {
         client_->Close();
         server_->Close();
-        WSACleanup();
     }
 };
 

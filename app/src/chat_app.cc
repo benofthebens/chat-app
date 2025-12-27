@@ -4,6 +4,13 @@
 #include "engine/window_props.h"
 #include "engine/widgets/button.h"
 #include "engine/props_builder.h"
+#include <random>
+#include <chrono>
+#include <sstream>
+
+#include "app/user.h"
+
+ChatAppLayer::ChatAppLayer() { }
 
 ChatAppLayer::~ChatAppLayer() {
     delete panel_;
@@ -16,7 +23,7 @@ void ChatAppLayer::OnEvent(Event& event) {
     EventDispatcher dispatcher(event);
 
     dispatcher.Dispatch<MessageReceiveEvent>([this](MessageReceiveEvent& e) {
-        chat_view_->AddMessage(e.GetMsg().data);
+        chat_view_->AddMessage(e.GetMsg());
         return false;  
     });
 }
@@ -51,8 +58,10 @@ void ChatAppLayer::OnAttach(Window& window) {
         .Size(50, 50)
         .Label("Send")
         .Build();
+
     button_props.on_click = [this]{
         Message msg{};
+        msg.user = User::Get();
         strcpy_s(msg.data, input_->GetText().c_str());
         MessageSendEvent event(msg);
         Application::Get().RaiseEvent(event);

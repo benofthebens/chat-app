@@ -10,10 +10,6 @@ struct TestProtocol {
 };
 
 TEST(SessionTest, Session_SendAndReceive) {
-    constexpr WORD version_requested = MAKEWORD(2, 2);
-    WSADATA wsa_data;
-    WSAStartup(version_requested, &wsa_data);
-
     Socket socket{ "127.0.0.1", 8080 };
 
     auto server = std::make_shared<ServerConnection>();

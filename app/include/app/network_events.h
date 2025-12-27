@@ -1,11 +1,13 @@
 #ifndef APP_NETWORK_EVENTS_H
 #define APP_NETWORK_EVENTS_H
 
+#include "user.h"
 #include "engine/events/event.h"
 
 using namespace Engine;
 
 struct Message {
+	User user;
 	char data[1024];
 };
 

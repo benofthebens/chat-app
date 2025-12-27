@@ -12,5 +12,5 @@ set(INCLUDE_FILES
 )
 add_library(Network ${SRC_FILES} ${INCLUDE_FILES})
 add_subdirectory("test")  
-target_link_libraries(Network PRIVATE WS2_32)
+target_link_libraries(Network PUBLIC WS2_32)
 target_include_directories(Network PUBLIC "include")

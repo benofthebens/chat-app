@@ -39,7 +39,8 @@ public:
  
 	void Send(const void* data) {
 		auto raw_data = protocol_->Serialise(data);
-		conn_->Send(raw_data.data(), raw_data.size());
+		const int n = static_cast<int>(raw_data.size());
+		conn_->Send(raw_data.data(), n);
 	}
 };
 #endif

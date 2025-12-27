@@ -1,5 +1,13 @@
 #include "network/socket.h"
 
+namespace {
+    struct Init {
+        WSADATA data;
+        Init() { WSAStartup(MAKEWORD(2, 2), &data); }
+        ~Init() { WSACleanup(); }
+    } winsock;
+};
+
 NetworkSocket::NetworkSocket() {
     handle_ = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 }

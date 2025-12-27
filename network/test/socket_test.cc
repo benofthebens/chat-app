@@ -5,15 +5,10 @@ class TcpSocketTest : public ::testing::Test {
 protected:
     std::unique_ptr<NetworkSocket> tcp_socket_;
     void SetUp() override {
-        constexpr WORD version_requested = MAKEWORD(2, 2); // gets the version requested
-        WSADATA wsa_data;
-        WSAStartup(version_requested, &wsa_data);
-
         tcp_socket_ = std::make_unique<NetworkSocket>();
     }
     void TearDown() override {
         tcp_socket_->Close();
-        WSACleanup();
     }
 };
 
