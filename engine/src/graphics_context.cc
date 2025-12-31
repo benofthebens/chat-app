@@ -72,6 +72,12 @@ void GraphicsContext::SetFont(const Font& font) {
 	}
 }
 
+SIZE GraphicsContext::MeasureText(const std::string& string) {
+	SIZE size;
+	GetTextExtentPoint32A(hdc_, string.c_str(), string.length(), &size);
+	return size;
+}
+
 void GraphicsContext::ResetFont() {
 	if (font_set_ && prev_font_) {
 		SelectObject(hdc_, prev_font_);

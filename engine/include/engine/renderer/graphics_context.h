@@ -35,6 +35,7 @@ namespace Engine {
 		void DrawRoundRect(LPRECT rect, int radius, const Colour& fill);
 		void DrawRect(LPRECT rect, const Colour& fill);
 		void SetFont(const Font& font);
+		SIZE MeasureText(const std::string& string); 
 		void ResetFont();
 	};
 }

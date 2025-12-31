@@ -13,7 +13,7 @@ int main() {
         Message msg;
         msg.user.id = -1;
         strcpy_s(msg.user.name,"");
-        strcpy_s(msg.data,"User has Joined the session");
+        strcpy_s(msg.data,"User has Joined the Session");
         server.SendAll(&msg);
     };
     server.on_message_ = [&server, &protocol](Session& session, const std::vector<uint8_t>& raw) {

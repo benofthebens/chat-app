@@ -53,7 +53,7 @@ void ChatPanel::OnPaint(Engine::GraphicsContext& ctx) {
             RECT join_rect = { client.left, y, client.right, y + height };
             ctx.SetFont(system_font);
             ctx.Text(msg.data, &join_rect, DT_CENTER, Colour::Black());
-            y += height + 20;
+            y += height + 10;
             continue;
         }
 
@@ -70,28 +70,30 @@ void ChatPanel::OnPaint(Engine::GraphicsContext& ctx) {
         ctx.DrawRoundRect(&bubble_rect, 15, colour);
 
         RECT tail = { bubble_rect.left, bubble_rect.top + 10, bubble_rect.right - 10, bubble_rect.bottom };
+
         if (is_user) {
             tail.left += 10;
             tail.right += 10;
         }
+
         ctx.DrawRect(&tail, colour);
         ctx.Text(msg.data, &msg_rect, DT_WORDBREAK | DT_EDITCONTROL, is_user ? Colour::White() : Colour::Black());
 
         ctx.SetFont(label_font);
-        RECT label = { bubble_rect.left, bubble_rect.bottom, bubble_rect.right, bubble_rect.bottom };
+        RECT label = { client.left, bubble_rect.bottom, client.right, bubble_rect.bottom + 17};
         
-        ctx.Text(msg.user.name, &label, DT_WORDBREAK | DT_CALCRECT | DT_EDITCONTROL);
-
-        int label_width = label.right - label.left;
+        SIZE text_size = ctx.MeasureText(msg.user.name);
         int label_height = label.bottom - label.top;
 
-        if (is_user) {
-            label.left = (client.right - 10) - label_width;
-            label.right = (client.right - 10);
-        }
-        ctx.Text(msg.user.name, &label);
+        int x = bubble_rect.left;
 
-        y += bubble_height + label_height + 5;
+        if (is_user) {
+            x = bubble_rect.right - text_size.cx;
+        }
+
+        ctx.Text(msg.user.name, { x, bubble_rect.bottom });
+
+        y += bubble_height + label_height + 10;
     }
     ctx.ResetFont();
 }
