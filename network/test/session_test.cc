@@ -20,7 +20,7 @@ TEST(SessionTest, Session_SendAndReceive) {
     server->Listen();
 
     std::thread attach_thread([server, &conn]() {
-        conn = std::make_shared<ClientConnection>(server->Accept(), true);
+        conn = std::make_shared<ClientConnection>(server->Accept());
     });
 
     client->Connect(socket);

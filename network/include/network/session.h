@@ -17,30 +17,7 @@ public:
 	explicit Session(const std::shared_ptr<ClientConnection>& conn, const std::shared_ptr<IProtocol>& protocol)
         : conn_(conn), protocol_(protocol) {}
 	~Session() = default;
-	void Run(std::function<void(Session&, const std::vector<uint8_t>&)> on_message) {
-		running_ = conn_->IsConnected();
-		while (running_) {
-			std::vector<uint8_t> buffer(protocol_->MessageSize());
-			const int n = static_cast<int>(buffer.size());
-			const int bytes_read = conn_->Receive(buffer.data(), n);
-
-			if (bytes_read < 0) { break; }
-
-			if (on_message) { on_message(*this, buffer); }
-		}
-	}
-
-	void Stop() {
-		if (conn_) {
-			conn_->Close();
-		}
-		running_ = false;
-	}
- 
-	void Send(const void* data) {
-		auto raw_data = protocol_->Serialise(data);
-		const int n = static_cast<int>(raw_data.size());
-		conn_->Send(raw_data.data(), n);
-	}
+	void Run(std::function<void(Session&, const std::vector<uint8_t>&)> on_message);
+	void Stop();
 };
 #endif

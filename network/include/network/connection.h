@@ -41,8 +41,8 @@ private:
 public:
     ClientConnection()
         : socket_(std::make_unique<NetworkSocket>()) {}
-    ClientConnection(std::unique_ptr<NetworkSocket> socket, const bool connected)
-        : socket_(std::move(socket)), connected_(connected) {}
+    ClientConnection(std::unique_ptr<NetworkSocket> socket)
+        : socket_(std::move(socket)), connected_(true) {}
     ~ClientConnection() override = default;
     int Send(const void* data, int size) override;
     int Receive(void* buffer, int size) override;
